@@ -22,4 +22,13 @@
     <style name="Theme.EggIncCompanion.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.EggIncCompanion.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- Your AppTheme or other themes/styles here -->
+
+    <!-- The launcher theme. It sets the main window background to the launch_screen drawable -->
+    <style name="Theme.EggIncCompanion.Launcher" parent="Theme.EggIncCompanion">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <!-- Optional, on Android 5+ you can modify the colorPrimaryDark color to match the windowBackground color for further branding-->
+        <item name="colorPrimaryDark">@color/colorOnPrimary</item>
+    </style>
 </resources>
