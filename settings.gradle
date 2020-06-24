@@ -1,0 +1,2 @@
+rootProject.name = "Egg Inc! Companion"
+include ':app'
