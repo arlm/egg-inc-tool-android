@@ -1,8 +1,8 @@
 package br.com.alexandremarcondes.egginc.companion
 
-import android.R.style
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.ui.core.ContentScale
@@ -10,10 +10,7 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
-import androidx.ui.foundation.drawBackground
-import androidx.ui.graphics.Color
 import androidx.ui.graphics.ImageAsset
-import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.layout.*
 import androidx.ui.material.Card
 import androidx.ui.material.EmphasisAmbient
@@ -22,7 +19,6 @@ import androidx.ui.material.ProvideEmphasis
 import androidx.ui.res.imageResource
 import androidx.ui.text.style.TextOverflow
 import androidx.ui.tooling.preview.Preview
-import androidx.ui.tooling.preview.UiMode
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 
@@ -30,26 +26,40 @@ import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             EggIncCompanionTheme {
-                InitialMenu()
+                InitialMenu(display!!.rotation)
             }
         }
     }
 }
 
 @Composable
-fun InitialMenu() {
-    Column (modifier = Modifier.padding(4.dp)) {
-        HomeCard(
-            image = imageResource(R.drawable.coop_card),
-            title =  "Manage Coops",
-            subTitle = "23 active contracts")
-        HomeCard(
-            image = imageResource(R.drawable.user_card),
-            title =  "View Users",
-            subTitle = "23 profiles registered")
+fun InitialMenu(rotation: Int) {
+    when (rotation) {
+        Surface.ROTATION_0, Surface.ROTATION_180 ->
+            Column (modifier = Modifier.padding(4.dp)) {
+                HomeContent()
+            }
+        Surface.ROTATION_90, Surface.ROTATION_270 ->
+            Row (modifier = Modifier.padding(4.dp)) {
+                HomeContent()
+            }
     }
+
+}
+
+@Composable
+private fun HomeContent() {
+    HomeCard(
+            image = imageResource(R.drawable.coop_card),
+            title = "Manage Coops",
+            subTitle = "23 active contracts")
+    HomeCard(
+            image = imageResource(R.drawable.user_card),
+            title = "View Users",
+            subTitle = "23 profiles registered")
 }
 
 @Composable
@@ -92,7 +102,7 @@ fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
 @Composable
 fun PortraitPreview() {
     EggIncCompanionTheme {
-        InitialMenu()
+        InitialMenu(Surface.ROTATION_0)
     }
 }
 
@@ -103,18 +113,18 @@ fun PortraitPreview() {
 @Composable
 fun PortraitDarkPreview() {
     EggIncCompanionTheme {
-        InitialMenu()
+        InitialMenu(Surface.ROTATION_180)
     }
 }
 
 @Preview("Dark Colors",
         group ="Lanscape",
         showBackground = true,
-        widthDp = 800)
+        widthDp = 720)
 @Composable
 fun LandscapePreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        InitialMenu()
+        InitialMenu(Surface.ROTATION_90)
     }
 }
 
@@ -122,10 +132,10 @@ fun LandscapePreview() {
         group ="Lanscape",
         showBackground = true,
         uiMode = Configuration.UI_MODE_NIGHT_YES,
-        widthDp = 800)
+        widthDp = 720)
 @Composable
 fun LandscapeDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        InitialMenu()
+        InitialMenu(Surface.ROTATION_270)
     }
 }
