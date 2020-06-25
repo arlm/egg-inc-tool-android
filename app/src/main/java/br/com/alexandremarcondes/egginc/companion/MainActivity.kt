@@ -1,6 +1,7 @@
 package br.com.alexandremarcondes.egginc.companion
 
 import android.R.style
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
@@ -12,6 +13,7 @@ import androidx.ui.foundation.Text
 import androidx.ui.foundation.drawBackground
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.ImageAsset
+import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.layout.*
 import androidx.ui.material.Card
 import androidx.ui.material.EmphasisAmbient
@@ -20,6 +22,7 @@ import androidx.ui.material.ProvideEmphasis
 import androidx.ui.res.imageResource
 import androidx.ui.text.style.TextOverflow
 import androidx.ui.tooling.preview.Preview
+import androidx.ui.tooling.preview.UiMode
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 
@@ -53,7 +56,9 @@ fun InitialMenu() {
 fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
     Card(
             shape =  MaterialTheme.shapes.medium,
-            modifier = Modifier.preferredSize(280.dp, 240.dp).padding(4.dp)
+            modifier = Modifier
+                    .preferredSize(280.dp, 240.dp)
+                    .padding(4.dp)
     ) {
         Column {
             Image(
@@ -81,17 +86,45 @@ fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview("Default Colors",
+        group = "Portrait",
+        showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun PortraitPreview() {
     EggIncCompanionTheme {
         InitialMenu()
     }
 }
 
-@Preview(showBackground = true)
+@Preview("Default Colors",
+        group = "Portrait",
+        uiMode = Configuration.UI_MODE_NIGHT_YES,
+        showBackground = true)
 @Composable
-fun DefaultPreviewDark() {
+fun PortraitDarkPreview() {
+    EggIncCompanionTheme {
+        InitialMenu()
+    }
+}
+
+@Preview("Dark Colors",
+        group ="Lanscape",
+        showBackground = true,
+        widthDp = 800)
+@Composable
+fun LandscapePreview() {
+    EggIncCompanionTheme(darkTheme = true) {
+        InitialMenu()
+    }
+}
+
+@Preview("Dark Colors",
+        group ="Lanscape",
+        showBackground = true,
+        uiMode = Configuration.UI_MODE_NIGHT_YES,
+        widthDp = 800)
+@Composable
+fun LandscapeDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
         InitialMenu()
     }
