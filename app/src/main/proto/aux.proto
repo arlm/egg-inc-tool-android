@@ -1,0 +1,16 @@
+syntax = "proto2";
+package aux;
+
+enum Platform {
+  DROID = 1;
+  IOS = 2;
+}
+
+enum AdNetwork {
+  VUNGLE = 1;
+  CHARTBOOST = 2;
+  AD_COLONY = 3;
+  HYPER_MX = 4;
+  UNITY = 5;
+  FACEBOOK = 6;
+}
