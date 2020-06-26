@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun InitialMenu(rotation: Int) {
+private fun InitialMenu(rotation: Int) {
     when (rotation) {
         Surface.ROTATION_0, Surface.ROTATION_180 ->
             Column (modifier = Modifier.padding(4.dp)) {
@@ -63,12 +63,13 @@ private fun HomeContent() {
 }
 
 @Composable
-fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
+private fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
     Card(
             shape =  MaterialTheme.shapes.medium,
             modifier = Modifier
                     .preferredSize(280.dp, 240.dp)
-                    .padding(4.dp)
+                    .padding(4.dp),
+            elevation = 6.dp
     ) {
         Column {
             Image(
@@ -100,7 +101,7 @@ fun HomeCard(image: ImageAsset, title: String, subTitle: String) {
         group = "Portrait",
         showBackground = true)
 @Composable
-fun PortraitPreview() {
+private fun PortraitPreview() {
     EggIncCompanionTheme {
         InitialMenu(Surface.ROTATION_0)
     }
@@ -111,7 +112,7 @@ fun PortraitPreview() {
         uiMode = Configuration.UI_MODE_NIGHT_YES,
         showBackground = true)
 @Composable
-fun PortraitDarkPreview() {
+private fun PortraitDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
         InitialMenu(Surface.ROTATION_180)
     }
@@ -122,7 +123,7 @@ fun PortraitDarkPreview() {
         showBackground = true,
         widthDp = 720)
 @Composable
-fun LandscapePreview() {
+private fun LandscapePreview() {
     EggIncCompanionTheme() {
         InitialMenu(Surface.ROTATION_90)
     }
@@ -134,7 +135,7 @@ fun LandscapePreview() {
         uiMode = Configuration.UI_MODE_NIGHT_YES,
         widthDp = 720)
 @Composable
-fun LandscapeDarkPreview() {
+private fun LandscapeDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
         InitialMenu(Surface.ROTATION_270)
     }
