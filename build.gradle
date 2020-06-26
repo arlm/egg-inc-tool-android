@@ -14,7 +14,7 @@ buildscript {
         maven { url "https://androidx-dev-prod.appspot.com/snapshots/builds/$snapshot/artifacts/ui/repository/" }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.0-alpha01"
+        classpath "com.android.tools.build:gradle:4.2.0-alpha02"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong

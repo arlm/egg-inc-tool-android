@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Surface
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
+import androidx.compose.onDispose
 import androidx.ui.core.ContentScale
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
@@ -106,24 +107,24 @@ fun PortraitPreview() {
     }
 }
 
-@Preview("Default Colors",
+@Preview("Dark Colors",
         group = "Portrait",
         uiMode = Configuration.UI_MODE_NIGHT_YES,
         showBackground = true)
 @Composable
 fun PortraitDarkPreview() {
-    EggIncCompanionTheme {
+    EggIncCompanionTheme(darkTheme = true) {
         InitialMenu(Surface.ROTATION_180)
     }
 }
 
-@Preview("Dark Colors",
+@Preview("Default Colors",
         group ="Lanscape",
         showBackground = true,
         widthDp = 720)
 @Composable
 fun LandscapePreview() {
-    EggIncCompanionTheme(darkTheme = true) {
+    EggIncCompanionTheme() {
         InitialMenu(Surface.ROTATION_90)
     }
 }
