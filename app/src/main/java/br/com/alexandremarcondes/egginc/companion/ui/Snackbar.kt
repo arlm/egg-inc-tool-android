@@ -13,6 +13,7 @@ import androidx.ui.layout.padding
 import androidx.ui.layout.preferredHeight
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
+import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import kotlinx.coroutines.delay
 
@@ -61,11 +62,6 @@ fun Snackbar(state: SnackbarState, modifier: Modifier = Modifier) {
     }
 }
 
-interface SnackbarState {
-    val currentSnack: String?
-    fun dismissCurrentSnack()
-}
-
 @Composable
 fun NonAnimatingSnackbar(state: SnackbarState, modifier: Modifier = Modifier) {
     state.currentSnack?.let { snack ->
@@ -89,16 +85,58 @@ fun NonAnimatingSnackbar(state: SnackbarState, modifier: Modifier = Modifier) {
     }
 }
 
-class SnackbarManager : SnackbarState {
-    private var snacks: List<String> by mutableStateOf(listOf())
-    override val currentSnack: String?
-        get() = snacks.getOrNull(0)
+@Preview("Animated", group = "Animated")
+@Composable
+fun AnimatedSnackbarPreview() {
+    EggIncCompanionTheme {
+        Snackbar(object : SnackbarState{
+            override val currentSnack: String?
+                get() = "Snackbar Message"
 
-    fun addSnack(snack: String) {
-        snacks = snacks + listOf(snack)
+            override fun dismissCurrentSnack() {
+            }
+        }, Modifier)
     }
+}
 
-    override fun dismissCurrentSnack() {
-        snacks = if (snacks.isNotEmpty()) snacks.drop(1) else snacks
+@Preview("Animated Dark", group = "Animated")
+@Composable
+fun AnimatedSnackbarDarkPreview() {
+    EggIncCompanionTheme(darkTheme = true) {
+        Snackbar(object : SnackbarState{
+            override val currentSnack: String?
+                get() = "Dark Snackbar Message"
+
+            override fun dismissCurrentSnack() {
+            }
+        }, Modifier)
+    }
+}
+
+@Preview("Non-Animated", group = "Non-Animated")
+@Composable
+fun NonAnimatedSnackbarPreview() {
+    EggIncCompanionTheme {
+        NonAnimatingSnackbar(object : SnackbarState{
+            override val currentSnack: String?
+                get() = "Snackbar Message"
+
+            override fun dismissCurrentSnack() {
+            }
+        }, Modifier)
+    }
+}
+
+@Preview("Non-Animated Dark", group = "Non-Animated")
+@Composable
+fun NonAnimatedSnackbarDarkPreview() {
+    EggIncCompanionTheme(darkTheme = true) {
+        NonAnimatingSnackbar(object : SnackbarState{
+            override val currentSnack: String?
+                get() = "Dark Snackbar Message"
+
+            override fun dismissCurrentSnack() {
+            }
+        }, Modifier)
     }
 }
