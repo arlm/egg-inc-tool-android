@@ -1,4 +1,4 @@
-package br.com.alexandremarcondes.egginc.companion
+package br.com.alexandremarcondes.egginc.companion.data.impl
 
 
 val user1 = ei.Ei.DeviceInfo.newBuilder()
