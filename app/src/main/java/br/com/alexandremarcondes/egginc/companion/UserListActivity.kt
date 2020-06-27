@@ -3,79 +3,108 @@ package br.com.alexandremarcondes.egginc.companion
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
+import androidx.compose.stateFor
+import androidx.ui.core.Alignment
+import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.CircleShape
-import androidx.ui.layout.padding
-import androidx.ui.layout.preferredSize
+import androidx.ui.layout.*
 import androidx.ui.material.Card
 import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
+import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
+import br.com.alexandremarcondes.egginc.companion.ui.*
 import ei.Ei
 
-class UserListActivity : AppCompatActivity() {
+class UserListActivity (
+    val repository: DataRepository
+) : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var users = listOf<Ei.DeviceInfo>()
-
         setContent {
             EggIncCompanionTheme {
-                UserList(users, false)
+                UserList(repository, false)
             }
         }
     }
 }
 
 @Composable
-fun UserList(users: List<Ei.DeviceInfo>, refreshingState: Boolean) {
+fun UserList(repository: DataRepository, refreshingState: Boolean) {
     if (refreshingState) {
         Loading()
     } else {
-        UserCard(users.first())
-        /*
-        SwipeToRefreshLayout(refreshingState = refreshingState,
-            onRefresh = {  },
-            refreshIndicator = { RefreshIndicator()
-            }
+        val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
+
+        SwipeToRefreshLayout(
+            refreshingState = refreshingState,
+            onRefresh = { refreshPosts() },
+            refreshIndicator = { RefreshIndicator() }
         ) {
-            UserListContent(users)
+            UserListContent(state)
         }
-        */
     }
 }
 
-/*
 @Composable
-fun UserListContent(users: List<Ei.DeviceInfo>) {
-    VerticalScroller(modifier = Modifier) {
-        users.forEach { user ->
-            UserCard(user)
+fun UserListContent(state: RefreshableUiState<List<Ei.DeviceInfo>>) {
+    val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
+        state is RefreshableUiState.Error
+    }
+
+    Stack(modifier = Modifier.fillMaxSize()) {
+        state.currentData?.let { users -> UserListContentBody(users) }
+
+        ErrorSnackbar(
+            showError = showSnackbarError,
+            onDismiss = { updateShowSnackbarError(false) },
+            modifier = Modifier.gravity(Alignment.BottomCenter)
+        )
+    }
+}
+
+@Composable
+fun UserListContentBody(users: List<Ei.DeviceInfo>) {
+    Stack(modifier = Modifier.fillMaxSize()) {
+        VerticalScroller(modifier = Modifier.fillMaxSize()) {
+            users.forEach { user ->
+                UserCard(user)
+            }
         }
     }
 }
-*/
 
 @Composable
 fun UserCard(user: Ei.DeviceInfo) {
     Card(
         shape =  MaterialTheme.shapes.small,
         modifier = Modifier
-            .preferredSize(280.dp, 80.dp)
+            .preferredHeight(80.dp)
+            .fillMaxWidth()
             .padding(4.dp),
         elevation = 6.dp) {
-        Text(text = "ID: ${user.deviceId}")
+        Column(modifier = Modifier.padding(4.dp)) {
+            Text(text = "ID: ${user.deviceId}")
+        }
     }
 }
 
 @Composable
 fun Loading() {
-    Text("Loading...")
+    Stack(modifier = Modifier.fillMaxSize()) {
+        Text(
+            "Loading...",
+            modifier = Modifier.gravity(Alignment.Center)
+        )
+    }
 }
 
 @Composable
@@ -93,37 +122,47 @@ private fun  RefreshIndicatorPreview() {
     }
 }
 
-@Preview("Card", group = "UserList")
+@Preview("Card", group = "Elements")
 @Composable
 private fun  UserCardPreview() {
     EggIncCompanionTheme {
-        UserCard(fakeUsers[0])
+        UserCard(loadFakeUsers().first())
     }
 }
 
-/*
-@Preview("Content", group = "UserList")
+@Preview("Content", group = "Elements")
 @Composable
 private fun  UserListContentPreview() {
     EggIncCompanionTheme {
-        UserListContent(fakeUsers)
+        UserListContentBody(loadFakeUsers())
     }
 }
 
-@Preview("Non-Updating", group = "UserList")
-@Composable
-private fun  UpdatingUserListPreview() {
-    EggIncCompanionTheme {
-        UserList(fakeUsers, false)
-    }
-}
-
-@Preview("Updating", group = "UserList")
+@Preview("Content Dark", group = "UserList")
 @Composable
 private fun UserListPreview() {
-    EggIncCompanionTheme {
-        UserList(fakeUsers, true)
+    EggIncCompanionTheme(darkTheme = true) {
+        UserListContentBody(loadFakeUsers())
     }
 }
 
-*/
+@Preview("Full UI Refreshing", group = "UI")
+@Composable
+private fun FullUiRefreshingPreview() {
+    EggIncCompanionTheme {
+        UserList(BlockingFakeDataRepository(ContextAmbient.current), true)
+    }
+}
+
+@Preview("Full UI Non-Refreshing", group = "UI")
+@Composable
+private fun FullUiNonRefreshingPreview() {
+    EggIncCompanionTheme {
+        UserList(BlockingFakeDataRepository(ContextAmbient.current), false)
+    }
+}
+
+@Composable
+private fun loadFakeUsers(): List<Ei.DeviceInfo> {
+    return previewDataFrom(BlockingFakeDataRepository(ContextAmbient.current)::getUsers)
+}

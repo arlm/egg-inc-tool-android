@@ -32,6 +32,11 @@ val fakeUsers: List<ei.Ei.DeviceInfo> =
         user2,
         user3,
         user4,
+        user5,
+        user1,
+        user2,
+        user3,
+        user4,
         user5
     )
 

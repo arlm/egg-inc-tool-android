@@ -7,12 +7,15 @@ import androidx.ui.core.DensityAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.drawLayer
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.contentColor
 import androidx.ui.layout.Row
 import androidx.ui.layout.fillMaxWidth
 import androidx.ui.layout.padding
 import androidx.ui.layout.preferredHeight
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Snackbar
 import androidx.ui.material.Surface
+import androidx.ui.material.TextButton
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -82,6 +85,41 @@ fun NonAnimatingSnackbar(state: SnackbarState, modifier: Modifier = Modifier) {
                 Text(snack, Modifier.padding(start = 16.dp, end = 16.dp))
             }
         }
+    }
+}
+
+@Composable
+fun ErrorSnackbar(
+    showError: Boolean,
+    modifier: Modifier = Modifier,
+    onErrorAction: () -> Unit = { },
+    onDismiss: () -> Unit = { }
+) {
+    if (showError) {
+        // Make Snackbar disappear after 5 seconds if the user hasn't interacted with it
+        launchInComposition {
+            delay(timeMillis = 5000L)
+            onDismiss()
+        }
+
+        Snackbar(
+            modifier = modifier.padding(16.dp),
+            text = { Text("Can't update latest news") },
+            action = {
+                TextButton(
+                    onClick = {
+                        onErrorAction()
+                        onDismiss()
+                    },
+                    contentColor = contentColor()
+                ) {
+                    Text(
+                        text = "RETRY",
+                        color = MaterialTheme.colors.snackbarAction
+                    )
+                }
+            }
+        )
     }
 }
 
