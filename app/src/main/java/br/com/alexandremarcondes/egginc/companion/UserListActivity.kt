@@ -28,15 +28,15 @@ import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
 import ei.Ei
 
-class UserListActivity (
-    val repository: DataRepository
-) : AppCompatActivity() {
+class UserListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val appContainer = (application as EggIncCompanionApp).container
+
         setContent {
             EggIncCompanionTheme {
-                UserList(repository, false)
+                UserList(appContainer.usersRepository, false)
             }
         }
     }
@@ -60,7 +60,7 @@ fun UserList(repository: DataRepository, refreshingState: Boolean) {
 }
 
 @Composable
-fun UserListContent(state: RefreshableUiState<List<User>>) {
+private fun UserListContent(state: RefreshableUiState<List<User>>) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
@@ -77,7 +77,7 @@ fun UserListContent(state: RefreshableUiState<List<User>>) {
 }
 
 @Composable
-fun UserListContentBody(users: List<User>) {
+private fun UserListContentBody(users: List<User>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             users.forEach { user ->
@@ -88,7 +88,7 @@ fun UserListContentBody(users: List<User>) {
 }
 
 @Composable
-fun UserCard(user: User) {
+private fun UserCard(user: User) {
     Card(
         shape =  MaterialTheme.shapes.small,
         modifier = Modifier
@@ -111,7 +111,7 @@ fun UserCard(user: User) {
 }
 
 @Composable
-fun Loading() {
+private fun Loading() {
     Stack(modifier = Modifier.fillMaxSize()) {
         Text(
             "Loading...",
@@ -121,7 +121,7 @@ fun Loading() {
 }
 
 @Composable
-fun RefreshIndicator() {
+private fun RefreshIndicator() {
     Surface(elevation = 10.dp, shape = CircleShape) {
         CircularProgressIndicator(Modifier.preferredSize(50.dp).padding(4.dp))
     }
