@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.stateFor
 import androidx.ui.core.Alignment
+import androidx.ui.core.Alignment.Horizontal
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
@@ -12,14 +13,18 @@ import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.*
+import androidx.ui.layout.ColumnScope.gravity
 import androidx.ui.material.Card
 import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
+import androidx.ui.text.style.TextAlign
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
+import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
+import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
 import ei.Ei
 
@@ -55,7 +60,7 @@ fun UserList(repository: DataRepository, refreshingState: Boolean) {
 }
 
 @Composable
-fun UserListContent(state: RefreshableUiState<List<Ei.DeviceInfo>>) {
+fun UserListContent(state: RefreshableUiState<List<User>>) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
@@ -72,7 +77,7 @@ fun UserListContent(state: RefreshableUiState<List<Ei.DeviceInfo>>) {
 }
 
 @Composable
-fun UserListContentBody(users: List<Ei.DeviceInfo>) {
+fun UserListContentBody(users: List<User>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             users.forEach { user ->
@@ -83,7 +88,7 @@ fun UserListContentBody(users: List<Ei.DeviceInfo>) {
 }
 
 @Composable
-fun UserCard(user: Ei.DeviceInfo) {
+fun UserCard(user: User) {
     Card(
         shape =  MaterialTheme.shapes.small,
         modifier = Modifier
@@ -92,7 +97,15 @@ fun UserCard(user: Ei.DeviceInfo) {
             .padding(4.dp),
         elevation = 6.dp) {
         Column(modifier = Modifier.padding(4.dp)) {
-            Text(text = "ID: ${user.deviceId}")
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text("${user.userName} (ID: ${user.userId})",
+                modifier = Modifier.weight(0.66f, true))
+                Text("${FarmerLevel.fromDouble(user.game?.currentMultiplier ?: 0.0)}",
+                modifier = Modifier.weight(0.33f, false),
+                textAlign = TextAlign.Right)
+            }
+            Text("${user.coopFarms.count()} coops")
+            Text("${user.contracts?.contractsCount ?: 0} contracts")
         }
     }
 }
@@ -163,6 +176,6 @@ private fun FullUiNonRefreshingPreview() {
 }
 
 @Composable
-private fun loadFakeUsers(): List<Ei.DeviceInfo> {
+private fun loadFakeUsers(): List<User> {
     return previewDataFrom(BlockingFakeDataRepository(ContextAmbient.current)::getUsers)
 }

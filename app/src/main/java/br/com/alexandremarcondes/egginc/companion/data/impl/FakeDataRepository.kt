@@ -4,7 +4,7 @@ import android.content.res.Resources
 import android.os.Handler
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.Result
-import ei.Ei
+import br.com.alexandremarcondes.egginc.companion.data.model.User
 import java.util.concurrent.ExecutorService
 import kotlin.random.Random
 
@@ -14,17 +14,17 @@ class FakeDataRepository(
     private val resources: Resources
 ) : DataRepository {
 
-    override fun getUser(deviceId: String, callback: (Result<Ei.DeviceInfo?>) -> Unit) {
+    override fun getUser(deviceId: String, callback: (Result<User?>) -> Unit) {
         executeInBackground(callback) {
             resultThreadHandler.post {
                 callback(Result.Success(
-                    fakeUsers.find { it.deviceId == deviceId }
+                    fakeUsers.find { it.deviceInfo?.deviceId ?: "" == deviceId }
                 ))
             }
         }
     }
 
-    override fun getUsers(callback: (Result<List<Ei.DeviceInfo>>) -> Unit) {
+    override fun getUsers(callback: (Result<List<User>>) -> Unit) {
         executeInBackground(callback) {
             simulateNetworkRequest()
             Thread.sleep(1500L)
