@@ -22,7 +22,7 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         Handler(Looper.getMainLooper())
     }
 
-    override val usersRepository: DataRepository by lazy {
+    override val dataRepository: DataRepository by lazy {
         FakeDataRepository(
             executorService = executorService,
             resultThreadHandler = mainThreadHandler,

@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             EggIncCompanionTheme {
                 AppContent(
                     navigationViewModel = navigationViewModel,
-                    dataRepository = appContainer.usersRepository,
+                    dataRepository = appContainer.dataRepository,
                     rotation = display!!.rotation)
             }
         }

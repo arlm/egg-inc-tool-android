@@ -1,23 +1,19 @@
 package br.com.alexandremarcondes.egginc.companion
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.stateFor
 import androidx.ui.core.Alignment
-import androidx.ui.core.Alignment.Horizontal
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
-import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.*
-import androidx.ui.layout.ColumnScope.gravity
 import androidx.ui.material.Card
-import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Surface
 import androidx.ui.text.style.TextAlign
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -26,7 +22,6 @@ import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepo
 import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
-import ei.Ei
 
 class UserListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +31,7 @@ class UserListActivity : AppCompatActivity() {
 
         setContent {
             EggIncCompanionTheme {
-                UserList(appContainer.usersRepository, false)
+                UserList(appContainer.dataRepository, false)
             }
         }
     }
@@ -56,6 +51,16 @@ fun UserList(repository: DataRepository, refreshingState: Boolean) {
         ) {
             UserListContent(state)
         }
+    }
+}
+
+@Composable
+private fun Loading() {
+    Stack(modifier = Modifier.fillMaxSize()) {
+        Text(
+            "Loading user list...",
+            modifier = Modifier.gravity(Alignment.Center)
+        )
     }
 }
 
@@ -82,14 +87,14 @@ private fun UserListContentBody(users: List<User>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             users.forEach { user ->
-                UserCard(user)
+                UserListItem(user)
             }
         }
     }
 }
 
 @Composable
-private fun UserCard(user: User) {
+private fun UserListItem(user: User) {
     Card(
         shape =  MaterialTheme.shapes.small,
         modifier = Modifier
@@ -111,40 +116,19 @@ private fun UserCard(user: User) {
     }
 }
 
-@Composable
-private fun Loading() {
-    Stack(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "Loading...",
-            modifier = Modifier.gravity(Alignment.Center)
-        )
-    }
-}
-
-@Composable
-private fun RefreshIndicator() {
-    Surface(elevation = 10.dp, shape = CircleShape) {
-        CircularProgressIndicator(Modifier.preferredSize(50.dp).padding(4.dp))
-    }
-}
-
-@Preview("Indicator" , group = "Refresh")
-@Composable
-private fun  RefreshIndicatorPreview() {
-    EggIncCompanionTheme {
-        RefreshIndicator()
-    }
-}
 
 @Preview("Card", group = "Elements")
 @Composable
 private fun  UserCardPreview() {
     EggIncCompanionTheme {
-        UserCard(loadFakeUsers().first())
+        UserListItem(loadFakeUsers().first())
     }
 }
 
-@Preview("Content", group = "Elements")
+@Preview("Content", group = "Elements",
+    widthDp = 411,
+    heightDp = 731,
+    showBackground = true)
 @Composable
 private fun  UserListContentPreview() {
     EggIncCompanionTheme {
@@ -152,7 +136,11 @@ private fun  UserListContentPreview() {
     }
 }
 
-@Preview("Content Dark", group = "UserList")
+@Preview("Content Dark", group = "UserList",
+    widthDp = 411,
+    heightDp = 731,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true)
 @Composable
 private fun UserListPreview() {
     EggIncCompanionTheme(darkTheme = true) {
@@ -160,7 +148,10 @@ private fun UserListPreview() {
     }
 }
 
-@Preview("Full UI Refreshing", group = "UI")
+@Preview("Full UI Refreshing", group = "UI",
+    widthDp = 411,
+    heightDp = 731,
+    showBackground = true)
 @Composable
 private fun FullUiRefreshingPreview() {
     EggIncCompanionTheme {
@@ -168,7 +159,10 @@ private fun FullUiRefreshingPreview() {
     }
 }
 
-@Preview("Full UI Non-Refreshing", group = "UI")
+@Preview("Full UI Non-Refreshing", group = "UI",
+    widthDp = 411,
+    heightDp = 731,
+    showBackground = true)
 @Composable
 private fun FullUiNonRefreshingPreview() {
     EggIncCompanionTheme {

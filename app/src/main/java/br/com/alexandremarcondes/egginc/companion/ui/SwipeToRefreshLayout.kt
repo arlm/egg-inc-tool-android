@@ -171,22 +171,6 @@ internal fun <T> StateDraggable(
     }
 }
 
-
-@Composable
-fun RefreshIndicator() {
-    Surface(elevation = 10.dp, shape = CircleShape) {
-        CircularProgressIndicator(Modifier.preferredSize(50.dp).padding(4.dp))
-    }
-}
-
-@Preview("Indicator" , group = "Refresh")
-@Composable
-private fun  RefreshIndicatorPreview() {
-    EggIncCompanionTheme {
-        RefreshIndicator()
-    }
-}
-
 @Preview("Non-Updating", group = "SwipeToRefresh")
 @Composable
 private fun  UpdatingUserListPreview() {
