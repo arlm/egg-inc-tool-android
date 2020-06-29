@@ -69,6 +69,7 @@ private fun UserListContent(state: RefreshableUiState<List<User>>) {
         state.currentData?.let { users -> UserListContentBody(users) }
 
         ErrorSnackbar(
+            text = "Could not refresh the user list!",
             showError = showSnackbarError,
             onDismiss = { updateShowSnackbarError(false) },
             modifier = Modifier.gravity(Alignment.BottomCenter)

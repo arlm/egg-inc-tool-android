@@ -1,6 +1,5 @@
 package br.com.alexandremarcondes.egginc.companion
 
-import android.app.Application
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Surface
@@ -12,7 +11,6 @@ import androidx.ui.core.Alignment
 import androidx.ui.core.ContentScale
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
-import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.clickable
@@ -20,7 +18,6 @@ import androidx.ui.graphics.ImageAsset
 import androidx.ui.layout.*
 import androidx.ui.layout.RowScope.gravity
 import androidx.ui.material.*
-import androidx.ui.material.ripple.ripple
 import androidx.ui.res.imageResource
 import androidx.ui.text.style.TextOverflow
 import androidx.ui.tooling.preview.Preview

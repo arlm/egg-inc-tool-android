@@ -1,20 +1,15 @@
 package br.com.alexandremarcondes.egginc.companion.ui
 
+import android.content.res.Configuration
 import androidx.compose.*
 import androidx.ui.animation.animatedFloat
-import androidx.ui.core.Alignment
 import androidx.ui.core.DensityAmbient
 import androidx.ui.core.Modifier
-import androidx.ui.core.drawLayer
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.contentColor
-import androidx.ui.layout.Row
-import androidx.ui.layout.fillMaxWidth
 import androidx.ui.layout.padding
-import androidx.ui.layout.preferredHeight
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Snackbar
-import androidx.ui.material.Surface
 import androidx.ui.material.TextButton
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -22,7 +17,7 @@ import kotlinx.coroutines.delay
 
 
 @Composable
-fun Snackbar(state: SnackbarState, modifier: Modifier = Modifier) {
+fun AnimatingSnackbar(state: SnackbarState, modifier: Modifier = Modifier) {
     val height = 48.dp
     val heightPx = with(DensityAmbient.current) { height.toIntPx().value.toFloat() }
     val offset = animatedFloat(heightPx)
@@ -47,21 +42,12 @@ fun Snackbar(state: SnackbarState, modifier: Modifier = Modifier) {
             delay(1000)
             dismissing = true
         }
-        Surface(
-            color = MaterialTheme.colors.secondary,
-            contentColor = MaterialTheme.colors.onSecondary,
-            modifier = modifier
-                .fillMaxWidth()
-                .preferredHeight(48.dp)
-                .drawLayer(translationY = offset.value)
-        ) {
-            Row(verticalGravity = Alignment.CenterVertically) {
-                Text(
-                    state.currentSnack!!,
-                    Modifier.padding(start = 16.dp, end = 16.dp)
-                )
-            }
-        }
+        Snackbar(
+            text = { Text(
+                state.currentSnack!!,
+                Modifier.padding(start = 16.dp, end = 16.dp)
+            ) },
+            modifier = Modifier.padding(8.dp))
     }
 }
 
@@ -74,22 +60,18 @@ fun NonAnimatingSnackbar(state: SnackbarState, modifier: Modifier = Modifier) {
             delay(1000)
             state.dismissCurrentSnack()
         }
-        Surface(
-            color = MaterialTheme.colors.secondary,
-            contentColor = MaterialTheme.colors.onSecondary,
-            modifier = modifier
-                .fillMaxWidth()
-                .preferredHeight(48.dp)
-        ) {
-            Row(verticalGravity = Alignment.CenterVertically) {
-                Text(snack, Modifier.padding(start = 16.dp, end = 16.dp))
-            }
-        }
+        Snackbar(
+            text = { Text(
+                state.currentSnack!!,
+                Modifier.padding(start = 16.dp, end = 16.dp)
+            ) },
+            modifier = Modifier.padding(8.dp))
     }
 }
 
 @Composable
 fun ErrorSnackbar(
+    text: String,
     showError: Boolean,
     modifier: Modifier = Modifier,
     onErrorAction: () -> Unit = { },
@@ -104,7 +86,7 @@ fun ErrorSnackbar(
 
         Snackbar(
             modifier = modifier.padding(16.dp),
-            text = { Text("Can't update latest news") },
+            text = { Text(text) },
             action = {
                 TextButton(
                     onClick = {
@@ -123,35 +105,68 @@ fun ErrorSnackbar(
     }
 }
 
-@Preview("Animated", group = "Animated")
+@Preview("Error", group = "Error",
+    widthDp = 411,
+    heightDp = 111,
+    showBackground = true)
+@Composable
+fun ErrorSnackbarPreview() {
+    EggIncCompanionTheme {
+        ErrorSnackbar("Can't update latest news", showError = true)
+    }
+}
+
+@Preview("Error Dark", group = "Error",
+    widthDp = 411,
+    heightDp = 111,
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ErrorSnackbarDarkPreview() {
+    EggIncCompanionTheme(darkTheme = true) {
+        ErrorSnackbar("Can't update latest dark news" , showError = true)
+    }
+}
+
+@Preview("Animated", group = "Animated",
+    widthDp = 411,
+    heightDp = 111,
+    showBackground = true)
 @Composable
 fun AnimatedSnackbarPreview() {
     EggIncCompanionTheme {
-        Snackbar(object : SnackbarState{
+        AnimatingSnackbar(object : SnackbarState{
             override val currentSnack: String?
                 get() = "Snackbar Message"
 
             override fun dismissCurrentSnack() {
             }
-        }, Modifier)
+        })
     }
 }
 
-@Preview("Animated Dark", group = "Animated")
+@Preview("Animated Dark", group = "Animated",
+    widthDp = 411,
+    heightDp = 111,
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun AnimatedSnackbarDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        Snackbar(object : SnackbarState{
+        AnimatingSnackbar(object : SnackbarState{
             override val currentSnack: String?
                 get() = "Dark Snackbar Message"
 
             override fun dismissCurrentSnack() {
             }
-        }, Modifier)
+        })
     }
 }
 
-@Preview("Non-Animated", group = "Non-Animated")
+@Preview("Non-Animated", group = "Non-Animated",
+    widthDp = 411,
+    heightDp = 111,
+    showBackground = true)
 @Composable
 fun NonAnimatedSnackbarPreview() {
     EggIncCompanionTheme {
@@ -161,11 +176,15 @@ fun NonAnimatedSnackbarPreview() {
 
             override fun dismissCurrentSnack() {
             }
-        }, Modifier)
+        })
     }
 }
 
-@Preview("Non-Animated Dark", group = "Non-Animated")
+@Preview("Non-Animated Dark", group = "Non-Animated",
+    showBackground = true,
+    widthDp = 411,
+    heightDp = 111,
+    uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun NonAnimatedSnackbarDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
@@ -175,6 +194,6 @@ fun NonAnimatedSnackbarDarkPreview() {
 
             override fun dismissCurrentSnack() {
             }
-        }, Modifier)
+        })
     }
 }
