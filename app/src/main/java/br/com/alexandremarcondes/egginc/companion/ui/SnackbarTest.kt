@@ -17,13 +17,13 @@ import androidx.ui.unit.dp
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, showBackground = true)
 @Composable
 fun SnackbarDemoPreview() {
-    SnackbarDemo(false);
+    SnackbarDemo(false)
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun SnackbarDemoDarkPreview() {
-    SnackbarDemo(true);
+    SnackbarDemo(true)
 }
 
 @Composable
