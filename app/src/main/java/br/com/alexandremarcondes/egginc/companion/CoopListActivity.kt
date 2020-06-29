@@ -20,6 +20,7 @@ import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
+import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
 
@@ -75,7 +76,7 @@ private fun CoopListContent(state: RefreshableUiState<List<User>>) {
         state.currentData?.let { users -> CoopListContentBody(users.first().contracts!!) }
 
         ErrorSnackbar(
-            text = "Could not refresh the user list!",
+            text = "Could not refresh the coop list!",
             showError = showSnackbarError,
             onDismiss = { updateShowSnackbarError(false) },
             modifier = Modifier.gravity(Alignment.BottomCenter)
@@ -97,19 +98,28 @@ private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
 
 @Composable
 private fun CoopListItem(localContract: ei.Ei.LocalContract) {
-    val icon = imageResource(R.drawable.egg_antimatter)
+    val egg = Egg.getByEgg(localContract.contract.egg) ?: Egg.UNKNOWN
+    val icon = imageResource(egg.resource)
 
-    ListItem(
-        text = { Text("Three line list item with 24x24 icon") },
-        secondaryText = {
-            Text(
-                "This is a long secondary text for the current list item " +
-                        "displayed on two lines"
-            )
-        },
-        singleLineSecondaryText = false,
-        icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
-    )
+    if (localContract.contract.coopAllowed) {
+        val coopText = if (localContract.accepted) "Coop: ${localContract.coopIdentifier}" else "Contract not accepted"
+        ListItem(
+            text = { Text(localContract.contract.name) },
+            secondaryText = { Text(localContract.contract.description) },
+            singleLineSecondaryText = true,
+            overlineText = { Text(coopText) },
+            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
+        )
+
+    } else {
+        ListItem(
+            text = { Text(localContract.contract.name) },
+            secondaryText = { Text(localContract.contract.description) },
+            singleLineSecondaryText = true,
+            overlineText = { Text("Solo contract") },
+            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
+        )
+    }
 }
 
 

@@ -63,7 +63,9 @@ private  fun AppContent(
                     repository = dataRepository,
                     refreshingState = false)
 
-                is Screen.CoopList -> TODO()
+                is Screen.CoopList -> CoopList(
+                    repository = dataRepository,
+                    refreshingState = false)
 
                 is Screen.User -> TODO()
 
