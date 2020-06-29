@@ -37,8 +37,7 @@ enum class FarmerLevel(val value: Int) {
     WeccaFarmer_3(35);
 
     companion object {
-        private val values = values();
-        fun getByValue(value: Int) = values.lastOrNull() { it.value <= value }
+        fun getByValue(value: Int) = values().lastOrNull() { it.value <= value }
         fun fromDouble(value: Double) = getByValue(Math.log10(value).toInt())
     }
 }
