@@ -21,6 +21,8 @@ import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
 import br.com.alexandremarcondes.egginc.companion.data.model.User
+import br.com.alexandremarcondes.egginc.companion.data.impl.researchItem1
+import br.com.alexandremarcondes.egginc.companion.data.impl.simulationContract1
 import br.com.alexandremarcondes.egginc.companion.ui.*
 
 class UserListActivity : AppCompatActivity() {
@@ -167,6 +169,20 @@ private fun FullUiRefreshingPreview() {
 private fun FullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
         UserList(BlockingFakeDataRepository(ContextAmbient.current), false)
+    }
+}
+
+@Preview("Test",
+    widthDp = 411,
+    heightDp = 731,
+    showBackground = true)
+@Composable
+private fun Test() {
+    EggIncCompanionTheme {
+        Column{
+            Text(researchItem1.id)
+            Text(simulationContract1.commonResearchList.firstOrNull()?.id ?: "null")
+        }
     }
 }
 
