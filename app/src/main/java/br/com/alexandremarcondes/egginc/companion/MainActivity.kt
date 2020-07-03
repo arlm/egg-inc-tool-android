@@ -6,6 +6,8 @@ import android.view.Surface
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
+import androidx.compose.getValue
+import androidx.compose.setValue
 import androidx.ui.animation.Crossfade
 import androidx.ui.core.Alignment
 import androidx.ui.core.ContentScale
@@ -14,14 +16,23 @@ import androidx.ui.core.setContent
 import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.clickable
+import androidx.ui.graphics.Color
 import androidx.ui.graphics.ImageAsset
 import androidx.ui.layout.*
 import androidx.ui.layout.RowScope.gravity
 import androidx.ui.material.*
 import androidx.ui.res.imageResource
+import androidx.ui.savedinstancestate.savedInstanceState
+import androidx.ui.text.SpanStyle
+import androidx.ui.text.annotatedString
+import androidx.ui.text.font.FontStyle
+import androidx.ui.text.font.FontWeight
 import androidx.ui.text.style.TextOverflow
+import androidx.ui.text.withStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import androidx.ui.unit.em
+import androidx.ui.unit.sp
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 import br.com.alexandremarcondes.egginc.companion.ui.NavigationViewModel
@@ -72,6 +83,49 @@ private  fun AppContent(
                 is Screen.Coop -> TODO()
             }
         }
+    }
+}
+
+@Composable
+private fun Setup(rotation: Int, navigateTo: (Screen) -> Unit) {
+    var id by savedInstanceState { "id" }
+    val image = imageResource(R.drawable.user_id)
+
+    val baseStyle = SpanStyle(color = MaterialTheme.colors.onBackground)
+    val menuStyle = SpanStyle( fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+    val arrowStyle = SpanStyle( fontWeight = FontWeight.Bold)
+
+    val text = annotatedString {
+        withStyle(style = baseStyle) {
+            append("Go to ")
+            withStyle(style = menuStyle) { append("Main Menu") }
+            withStyle(style = arrowStyle) { append(" -> ") }
+            withStyle(style = menuStyle) { append("Settings") }
+            withStyle(style = arrowStyle) { append(" -> ") }
+            withStyle(style = menuStyle) {  append("Privacy & Data") }
+            append(" and look on the last line of the window.")
+
+        }
+    }
+
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .padding(4.dp)) {
+        FilledTextField(
+            value = id,
+            onValueChange = { id = it },
+            label = { Text("Enter your Egg Inc! ID") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(text)
+        Spacer(modifier = Modifier.height(15.dp))
+        Image(
+            asset = image,
+            modifier = Modifier
+                .fillMaxHeight()
+                .aspectRatio(1.771f)
+        )
     }
 }
 
@@ -160,7 +214,7 @@ private fun HomeCard(image: ImageAsset, title: String, subTitle: String, portrai
 @Composable
 private fun PortraitPreview() {
     EggIncCompanionTheme {
-        InitialMenu(Surface.ROTATION_0, {})
+        InitialMenu(Surface.ROTATION_0) {}
     }
 }
 
@@ -173,7 +227,7 @@ private fun PortraitPreview() {
 @Composable
 private fun PortraitDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        InitialMenu(Surface.ROTATION_180, {})
+        InitialMenu(Surface.ROTATION_180) {}
     }
 }
 
@@ -185,7 +239,7 @@ private fun PortraitDarkPreview() {
 @Composable
 private fun LandscapePreview() {
     EggIncCompanionTheme() {
-        InitialMenu(Surface.ROTATION_90, {} )
+        InitialMenu(Surface.ROTATION_90) {}
     }
 }
 
@@ -198,6 +252,31 @@ private fun LandscapePreview() {
 @Composable
 private fun LandscapeDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        InitialMenu(Surface.ROTATION_270, {})
+        InitialMenu(Surface.ROTATION_270) {}
+    }
+}
+
+@Preview("Default Colors",
+    group ="Setup",
+    widthDp = 731,
+    heightDp = 411,
+    showBackground = true)
+@Composable
+private fun SetupPreview() {
+    EggIncCompanionTheme() {
+        Setup(Surface.ROTATION_90) {}
+    }
+}
+
+@Preview("Dark Colors",
+    group = "Setup",
+    widthDp = 411,
+    heightDp = 731,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true)
+@Composable
+private fun SetupDarkPreview() {
+    EggIncCompanionTheme(darkTheme = true) {
+        Setup(Surface.ROTATION_180) {}
     }
 }
