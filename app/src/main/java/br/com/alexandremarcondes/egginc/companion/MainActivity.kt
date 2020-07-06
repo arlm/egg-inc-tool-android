@@ -16,7 +16,6 @@ import androidx.ui.core.setContent
 import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.clickable
-import androidx.ui.graphics.Color
 import androidx.ui.graphics.ImageAsset
 import androidx.ui.layout.*
 import androidx.ui.layout.RowScope.gravity
@@ -31,12 +30,17 @@ import androidx.ui.text.style.TextOverflow
 import androidx.ui.text.withStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import androidx.ui.unit.em
-import androidx.ui.unit.sp
+import br.com.alexandremarcondes.egginc.companion.data.AppDatabase
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.impl.FakeAppDatabase
+import br.com.alexandremarcondes.egginc.companion.data.model.Settings
 import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 import br.com.alexandremarcondes.egginc.companion.ui.NavigationViewModel
 import br.com.alexandremarcondes.egginc.companion.ui.Screen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
     private val navigationViewModel by viewModels<NavigationViewModel>()
@@ -44,14 +48,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val appContainer = (application as EggIncCompanionApp).container
+        val app = application as EggIncCompanionApp
+        var settings: Settings? = null
+
+        runBlocking {
+            GlobalScope.launch(Dispatchers.IO) {
+                settings = app.database.settingsDao().getAll().firstOrNull()
+            }.join()
+        }
 
         setContent {
             EggIncCompanionTheme {
                 AppContent(
                     navigationViewModel = navigationViewModel,
-                    dataRepository = appContainer.dataRepository,
-                    rotation = display!!.rotation)
+                    dataRepository = app.container.dataRepository,
+                    database = app.database,
+                    settings = settings,
+                    rotation = display!!.rotation
+                )
             }
         }
     }
@@ -61,34 +75,43 @@ class MainActivity : AppCompatActivity() {
 private  fun AppContent(
     navigationViewModel: NavigationViewModel,
     dataRepository: DataRepository,
+    database: AppDatabase,
+    settings: Settings?,
     rotation: Int) {
     Crossfade(navigationViewModel.currentScreen) { screen ->
-        Surface(color = MaterialTheme.colors.background) {
-            when (screen) {
-                is Screen.Home -> InitialMenu(
-                    rotation = rotation,
-                    navigateTo = navigationViewModel::navigateTo
-                )
+        if (settings == null) {
+            Setup(database)
+        }
+        else {
+            Surface(color = MaterialTheme.colors.background) {
+                when (screen) {
+                    is Screen.Home -> InitialMenu(
+                        rotation = rotation,
+                        navigateTo = navigationViewModel::navigateTo
+                    )
 
-                is  Screen.UserList -> UserList(
-                    repository = dataRepository,
-                    refreshingState = false)
+                    is Screen.UserList -> UserList(
+                        repository = dataRepository,
+                        refreshingState = false
+                    )
 
-                is Screen.CoopList -> CoopList(
-                    repository = dataRepository,
-                    refreshingState = false)
+                    is Screen.CoopList -> CoopList(
+                        repository = dataRepository,
+                        refreshingState = false
+                    )
 
-                is Screen.User -> TODO()
+                    is Screen.User -> TODO()
 
-                is Screen.Coop -> TODO()
+                    is Screen.Coop -> TODO()
+                }
             }
         }
     }
 }
 
 @Composable
-private fun Setup(rotation: Int, navigateTo: (Screen) -> Unit) {
-    var id by savedInstanceState { "id" }
+private fun Setup(database: AppDatabase) {
+    var id by savedInstanceState { "" }
     val image = imageResource(R.drawable.user_id)
 
     val baseStyle = SpanStyle(color = MaterialTheme.colors.onBackground)
@@ -110,13 +133,25 @@ private fun Setup(rotation: Int, navigateTo: (Screen) -> Unit) {
 
     Column (modifier = Modifier
         .fillMaxSize()
-        .padding(4.dp)) {
-        FilledTextField(
-            value = id,
-            onValueChange = { id = it },
-            label = { Text("Enter your Egg Inc! ID") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        .padding(5.dp)) {
+        Row (modifier = Modifier.padding(5.dp)){
+            FilledTextField(
+                value = id,
+                onValueChange = { id = it },
+                label = { Text("Enter your Egg Inc! ID") },
+                modifier = Modifier.weight(0.75f, fill = true)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+            Button(
+                text = { Text("Save") },
+                onClick = {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        database.settingsDao().insertAll(Settings(eggIncId = id))
+                    }
+                },
+                modifier = Modifier.weight(0.25f).gravity(align = Alignment.CenterVertically)
+            )
+        }
         Spacer(modifier = Modifier.height(5.dp))
         Text(text)
         Spacer(modifier = Modifier.height(15.dp))
@@ -238,7 +273,7 @@ private fun PortraitDarkPreview() {
         showBackground = true)
 @Composable
 private fun LandscapePreview() {
-    EggIncCompanionTheme() {
+    EggIncCompanionTheme {
         InitialMenu(Surface.ROTATION_90) {}
     }
 }
@@ -264,7 +299,7 @@ private fun LandscapeDarkPreview() {
 @Composable
 private fun SetupPreview() {
     EggIncCompanionTheme() {
-        Setup(Surface.ROTATION_90) {}
+        Setup(FakeAppDatabase())
     }
 }
 
@@ -277,6 +312,6 @@ private fun SetupPreview() {
 @Composable
 private fun SetupDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        Setup(Surface.ROTATION_180) {}
+        Setup(FakeAppDatabase())
     }
 }
