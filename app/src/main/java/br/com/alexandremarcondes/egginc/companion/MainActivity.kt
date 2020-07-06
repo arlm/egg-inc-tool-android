@@ -83,19 +83,16 @@ private  fun AppContent(
 
         navigationViewModel.navigateTo(Screen.Loading)
 
-        runBlocking {
-            GlobalScope.launch(Dispatchers.IO) {
-                val settings = app.database.settingsDao().getAll().firstOrNull()
+        GlobalScope.launch(Dispatchers.IO) {
+            val settings = app.database.settingsDao().getAll().firstOrNull()
 
-                if (settings == null) {
-                    scope.launch { navigationViewModel.navigateTo(Screen.Setup) }
-                }
+            if (settings == null) {
+                scope.launch { navigationViewModel.navigateTo(Screen.Setup) }
             }
         }.invokeOnCompletion {
             scope.launch {
                 if ((it == null || it is CancellationException) &&
-                    navigationViewModel.currentScreen == Screen.Loading
-                ) {
+                    navigationViewModel.currentScreen == Screen.Loading) {
                     navigationViewModel.navigateTo(Screen.Home)
                 }
             }
