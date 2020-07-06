@@ -41,7 +41,7 @@ class CoopListActivity : AppCompatActivity() {
 @Composable
 fun CoopList(repository: DataRepository, refreshingState: Boolean) {
     if (refreshingState) {
-        Loading()
+        Loading("coop list")
     } else {
         val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
 
@@ -54,17 +54,6 @@ fun CoopList(repository: DataRepository, refreshingState: Boolean) {
         }
     }
 }
-
-@Composable
-private fun Loading() {
-    Stack(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "Loading coop list...",
-            modifier = Modifier.gravity(Alignment.Center)
-        )
-    }
-}
-
 
 @Composable
 private fun CoopListContent(state: RefreshableUiState<List<User>>) {

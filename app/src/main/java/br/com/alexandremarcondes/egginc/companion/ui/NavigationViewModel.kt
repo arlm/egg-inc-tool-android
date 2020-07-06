@@ -110,6 +110,8 @@ private fun Bundle.toScreen(): Screen {
             val userId = getStringOrThrow(SIS_USER)
             Screen.Coop(userId)
         }
+        ScreenName.LOADING -> Screen.Loading
+        ScreenName.SETUP -> Screen.Setup
     }
 }
 

@@ -13,6 +13,13 @@ sealed class Screen(val id: ScreenName) {
     object CoopList : Screen(
         ScreenName.COOP_LIST
     )
+    object Loading : Screen(
+        ScreenName.SETUP
+    )
+    object Setup : Screen(
+        ScreenName.LOADING
+    )
+
     data class User(val userId: String) : Screen(
         ScreenName.USER
     )

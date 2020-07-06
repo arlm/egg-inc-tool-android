@@ -42,7 +42,7 @@ class UserListActivity : AppCompatActivity() {
 @Composable
 fun UserList(repository: DataRepository, refreshingState: Boolean) {
     if (refreshingState) {
-        Loading()
+        Loading("user list")
     } else {
         val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
 
@@ -53,16 +53,6 @@ fun UserList(repository: DataRepository, refreshingState: Boolean) {
         ) {
             UserListContent(state)
         }
-    }
-}
-
-@Composable
-private fun Loading() {
-    Stack(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "Loading user list...",
-            modifier = Modifier.gravity(Alignment.Center)
-        )
     }
 }
 

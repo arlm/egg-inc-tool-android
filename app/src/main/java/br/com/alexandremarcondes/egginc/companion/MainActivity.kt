@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.getValue
+import androidx.compose.onActive
 import androidx.compose.setValue
 import androidx.ui.animation.Crossfade
 import androidx.ui.core.Alignment
@@ -31,16 +32,13 @@ import androidx.ui.text.withStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.data.AppDatabase
-import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.IAppContainer
 import br.com.alexandremarcondes.egginc.companion.data.impl.FakeAppDatabase
 import br.com.alexandremarcondes.egginc.companion.data.model.Settings
 import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 import br.com.alexandremarcondes.egginc.companion.ui.NavigationViewModel
 import br.com.alexandremarcondes.egginc.companion.ui.Screen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     private val navigationViewModel by viewModels<NavigationViewModel>()
@@ -49,21 +47,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val app = application as EggIncCompanionApp
-        var settings: Settings? = null
-
-        runBlocking {
-            GlobalScope.launch(Dispatchers.IO) {
-                settings = app.database.settingsDao().getAll().firstOrNull()
-            }.join()
-        }
 
         setContent {
             EggIncCompanionTheme {
                 AppContent(
                     navigationViewModel = navigationViewModel,
-                    dataRepository = app.container.dataRepository,
-                    database = app.database,
-                    settings = settings,
+                    app = app.container,
                     rotation = display!!.rotation
                 )
             }
@@ -72,45 +61,85 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
+fun Loading(message: String = "") {
+    Stack(modifier = Modifier.fillMaxSize()) {
+        Text(
+            "Loading $message...",
+            modifier = Modifier.gravity(Alignment.Center)
+        )
+    }
+}
+
+
+@Composable
 private  fun AppContent(
     navigationViewModel: NavigationViewModel,
-    dataRepository: DataRepository,
-    database: AppDatabase,
-    settings: Settings?,
+    app: IAppContainer,
     rotation: Int) {
-    Crossfade(navigationViewModel.currentScreen) { screen ->
-        if (settings == null) {
-            Setup(database)
-        }
-        else {
-            Surface(color = MaterialTheme.colors.background) {
-                when (screen) {
-                    is Screen.Home -> InitialMenu(
-                        rotation = rotation,
-                        navigateTo = navigationViewModel::navigateTo
-                    )
+    onActive {
+        val scope = CoroutineScope((Dispatchers.Main))
 
-                    is Screen.UserList -> UserList(
-                        repository = dataRepository,
-                        refreshingState = false
-                    )
+        onDispose { scope.cancel() }
 
-                    is Screen.CoopList -> CoopList(
-                        repository = dataRepository,
-                        refreshingState = false
-                    )
+        navigationViewModel.navigateTo(Screen.Loading)
 
-                    is Screen.User -> TODO()
+        runBlocking {
+            GlobalScope.launch(Dispatchers.IO) {
+                val settings = app.database.settingsDao().getAll().firstOrNull()
 
-                    is Screen.Coop -> TODO()
+                if (settings == null) {
+                    scope.launch { navigationViewModel.navigateTo(Screen.Setup) }
                 }
+            }
+        }.invokeOnCompletion {
+            scope.launch {
+                if ((it == null || it is CancellationException) &&
+                    navigationViewModel.currentScreen == Screen.Loading
+                ) {
+                    navigationViewModel.navigateTo(Screen.Home)
+                }
+            }
+        }
+    }
+
+    Crossfade(navigationViewModel.currentScreen) { screen ->
+        Surface(color = MaterialTheme.colors.background) {
+            when (screen) {
+                is Screen.Home -> InitialMenu(
+                    rotation = rotation,
+                    navigateTo = navigationViewModel::navigateTo
+                )
+
+                is Screen.UserList -> UserList(
+                    repository = app.dataRepository,
+                    refreshingState = false
+                )
+
+                is Screen.CoopList -> CoopList(
+                    repository =app.dataRepository,
+                    refreshingState = false
+                )
+
+                is Screen.User -> TODO()
+
+                is Screen.Coop -> TODO()
+
+                is Screen.Loading -> Loading()
+
+                is Screen.Setup -> Setup(
+                    database = app.database,
+                    navigateTo = navigationViewModel::navigateTo
+                )
             }
         }
     }
 }
 
 @Composable
-private fun Setup(database: AppDatabase) {
+private fun Setup(
+    database: AppDatabase,
+    navigateTo: (Screen) -> Unit
+) {
     var id by savedInstanceState { "" }
     val image = imageResource(R.drawable.user_id)
 
@@ -127,7 +156,6 @@ private fun Setup(database: AppDatabase) {
             withStyle(style = arrowStyle) { append(" -> ") }
             withStyle(style = menuStyle) {  append("Privacy & Data") }
             append(" and look on the last line of the window.")
-
         }
     }
 
@@ -145,9 +173,14 @@ private fun Setup(database: AppDatabase) {
             Button(
                 text = { Text("Save") },
                 onClick = {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        database.settingsDao().insertAll(Settings(eggIncId = id))
-                    }
+                    val settings = Settings(eggIncId = id)
+                        GlobalScope.launch(Dispatchers.IO) {
+                            database.settingsDao().insert(settings)
+                        }.invokeOnCompletion {
+                            GlobalScope.launch(Dispatchers.Main) {
+                                navigateTo(Screen.Home)
+                            }
+                        }
                 },
                 modifier = Modifier.weight(0.25f).gravity(align = Alignment.CenterVertically)
             )
@@ -298,8 +331,8 @@ private fun LandscapeDarkPreview() {
     showBackground = true)
 @Composable
 private fun SetupPreview() {
-    EggIncCompanionTheme() {
-        Setup(FakeAppDatabase())
+    EggIncCompanionTheme {
+        Setup(FakeAppDatabase()) {}
     }
 }
 
@@ -312,6 +345,6 @@ private fun SetupPreview() {
 @Composable
 private fun SetupDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        Setup(FakeAppDatabase())
+        Setup(FakeAppDatabase()) {}
     }
 }

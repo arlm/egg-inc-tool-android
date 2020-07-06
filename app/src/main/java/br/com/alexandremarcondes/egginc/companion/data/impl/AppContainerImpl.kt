@@ -3,7 +3,8 @@ package br.com.alexandremarcondes.egginc.companion.data.impl
 import android.content.Context
 import android.os.Looper
 import android.os.Handler
-import br.com.alexandremarcondes.egginc.companion.data.AppContainer
+import br.com.alexandremarcondes.egginc.companion.data.AppDatabase
+import br.com.alexandremarcondes.egginc.companion.data.IAppContainer
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -13,7 +14,7 @@ import java.util.concurrent.Executors
  *
  * Variables are initialized lazily and the same instance is shared across the whole app.
  */
-class AppContainerImpl(private val applicationContext: Context) : AppContainer {
+class AppContainerImpl(private val applicationContext: Context) : IAppContainer {
     private val executorService: ExecutorService by lazy {
         Executors.newFixedThreadPool(4)
     }
@@ -22,6 +23,12 @@ class AppContainerImpl(private val applicationContext: Context) : AppContainer {
         Handler(Looper.getMainLooper())
     }
 
+     // Rooms Database instance used by the rest of classes to obtain dependencies
+     override val database: AppDatabase by lazy {
+         AppDatabase.getDatabase(applicationContext)
+    }
+
+    // Fake data repository
     override val dataRepository: DataRepository by lazy {
         FakeDataRepository(
             executorService = executorService,
