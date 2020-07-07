@@ -1,4 +1,4 @@
-package br.com.alexandremarcondes.egginc.companion
+package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +14,7 @@ import androidx.ui.layout.Column
 import androidx.ui.layout.Stack
 import androidx.ui.layout.fillMaxSize
 import androidx.ui.tooling.preview.Preview
+import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.researchItem1
@@ -29,7 +30,10 @@ class UserActivity : AppCompatActivity() {
 
         setContent {
             EggIncCompanionTheme {
-                UserData(appContainer.dataRepository, false)
+                UserData(
+                    appContainer.dataRepository,
+                    false
+                )
             }
         }
     }
@@ -38,7 +42,7 @@ class UserActivity : AppCompatActivity() {
 @Composable
 fun UserData(repository: DataRepository, refreshingState: Boolean) {
     if (refreshingState) {
-        Loading()
+        Loading("user data")
     } else {
         val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
 
@@ -47,29 +51,25 @@ fun UserData(repository: DataRepository, refreshingState: Boolean) {
             onRefresh = { refreshPosts() },
             refreshIndicator = { RefreshIndicator() }
         ) {
-            UserListContent(state)
+            UserContent(
+                state
+            )
         }
     }
 }
 
 @Composable
-private fun Loading() {
-    Stack(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "Loading user list...",
-            modifier = Modifier.gravity(Alignment.Center)
-        )
-    }
-}
-
-@Composable
-private fun UserListContent(state: RefreshableUiState<List<User>>) {
+private fun UserContent(state: RefreshableUiState<List<User>>) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
 
     Stack(modifier = Modifier.fillMaxSize()) {
-        state.currentData?.let { users -> UserListContentBody(users) }
+        state.currentData?.let { users ->
+            UserContentBody(
+                users
+            )
+        }
 
         ErrorSnackbar(
             text = "Could not refresh the user list!",
@@ -81,7 +81,7 @@ private fun UserListContent(state: RefreshableUiState<List<User>>) {
 }
 
 @Composable
-private fun UserListContentBody(users: List<User>) {
+private fun UserContentBody(users: List<User>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
 
@@ -94,9 +94,12 @@ private fun UserListContentBody(users: List<User>) {
     heightDp = 731,
     showBackground = true)
 @Composable
-private fun FullUiNonRefreshingPreview() {
+private fun UserFullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
-        UserList(BlockingFakeDataRepository(ContextAmbient.current), false)
+        UserList(
+            BlockingFakeDataRepository(ContextAmbient.current),
+            false
+        )
     }
 }
 
@@ -105,16 +108,11 @@ private fun FullUiNonRefreshingPreview() {
     heightDp = 731,
     showBackground = true)
 @Composable
-private fun Test() {
+private fun UserTest() {
     EggIncCompanionTheme {
         Column{
             Text(researchItem1.id)
             Text(simulationContract1.commonResearchList.firstOrNull()?.id ?: "null")
         }
     }
-}
-
-@Composable
-private fun loadFakeUsers(): List<User> {
-    return previewDataFrom(BlockingFakeDataRepository(ContextAmbient.current)::getUsers)
 }

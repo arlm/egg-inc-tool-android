@@ -1,4 +1,4 @@
-package br.com.alexandremarcondes.egginc.companion
+package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -9,22 +9,24 @@ import androidx.ui.core.Alignment
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
-import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.*
-import androidx.ui.material.Divider
-import androidx.ui.material.ListItem
-import androidx.ui.res.imageResource
+import androidx.ui.material.Card
+import androidx.ui.material.MaterialTheme
+import androidx.ui.text.style.TextAlign
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
 import br.com.alexandremarcondes.egginc.companion.data.DataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
-import br.com.alexandremarcondes.egginc.companion.data.model.Egg
+import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
 import br.com.alexandremarcondes.egginc.companion.data.model.User
+import br.com.alexandremarcondes.egginc.companion.data.impl.researchItem1
+import br.com.alexandremarcondes.egginc.companion.data.impl.simulationContract1
 import br.com.alexandremarcondes.egginc.companion.ui.*
 
-class CoopListActivity : AppCompatActivity() {
+class UserListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -32,16 +34,19 @@ class CoopListActivity : AppCompatActivity() {
 
         setContent {
             EggIncCompanionTheme {
-                CoopList(appContainer.dataRepository, false)
+                UserList(
+                    appContainer.dataRepository,
+                    false
+                )
             }
         }
     }
 }
 
 @Composable
-fun CoopList(repository: DataRepository, refreshingState: Boolean) {
+fun UserList(repository: DataRepository, refreshingState: Boolean) {
     if (refreshingState) {
-        Loading("coop list")
+        Loading("user list")
     } else {
         val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
 
@@ -50,22 +55,28 @@ fun CoopList(repository: DataRepository, refreshingState: Boolean) {
             onRefresh = { refreshPosts() },
             refreshIndicator = { RefreshIndicator() }
         ) {
-            CoopListContent(state)
+            UserListContent(
+                state
+            )
         }
     }
 }
 
 @Composable
-private fun CoopListContent(state: RefreshableUiState<List<User>>) {
+private fun UserListContent(state: RefreshableUiState<List<User>>) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
 
     Stack(modifier = Modifier.fillMaxSize()) {
-        state.currentData?.let { users -> CoopListContentBody(users.first().contracts!!) }
+        state.currentData?.let { users ->
+            UserListContentBody(
+                users
+            )
+        }
 
         ErrorSnackbar(
-            text = "Could not refresh the coop list!",
+            text = "Could not refresh the user list!",
             showError = showSnackbarError,
             onDismiss = { updateShowSnackbarError(false) },
             modifier = Modifier.gravity(Alignment.BottomCenter)
@@ -74,49 +85,49 @@ private fun CoopListContent(state: RefreshableUiState<List<User>>) {
 }
 
 @Composable
-private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
+private fun UserListContentBody(users: List<User>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
-            myContracts.contractsList.forEach { contract ->
-                CoopListItem(contract)
-                Divider()
+            users.forEach { user ->
+                UserListItem(
+                    user
+                )
             }
         }
     }
 }
 
 @Composable
-private fun CoopListItem(localContract: ei.Ei.LocalContract) {
-    val egg = Egg.getByEgg(localContract.contract.egg) ?: Egg.UNKNOWN
-    val icon = imageResource(egg.resource)
-
-    if (localContract.contract.coopAllowed) {
-        val coopText = if (localContract.accepted) "Coop: ${localContract.coopIdentifier}" else "Contract not accepted"
-        ListItem(
-            text = { Text(localContract.contract.name) },
-            secondaryText = { Text(localContract.contract.description) },
-            singleLineSecondaryText = true,
-            overlineText = { Text(coopText) },
-            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
-        )
-
-    } else {
-        ListItem(
-            text = { Text(localContract.contract.name) },
-            secondaryText = { Text(localContract.contract.description) },
-            singleLineSecondaryText = true,
-            overlineText = { Text("Solo contract") },
-            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
-        )
+private fun UserListItem(user: User) {
+    Card(
+        shape =  MaterialTheme.shapes.small,
+        modifier = Modifier
+            .preferredHeight(80.dp)
+            .fillMaxWidth()
+            .padding(4.dp),
+        elevation = 6.dp) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text("${user.userName} (ID: ${user.userId})",
+                modifier = Modifier.weight(0.66f, true))
+                Text("${FarmerLevel.fromDouble(user.game?.currentMultiplier ?: 0.0)}",
+                modifier = Modifier.weight(0.33f, false),
+                textAlign = TextAlign.Right)
+            }
+            Text("${user.coopFarms.count()} coops")
+            Text("${user.contracts?.contractsCount ?: 0} contracts")
+        }
     }
 }
 
 
 @Preview("Card", group = "Elements")
 @Composable
-private fun  CoopListItemPreview() {
+private fun  UserCardPreview() {
     EggIncCompanionTheme {
-        CoopListItem(loadFakeUsers().first().contracts!!.contractsList.first())
+        UserListItem(
+            loadFakeUsers().first()
+        )
     }
 }
 
@@ -125,9 +136,11 @@ private fun  CoopListItemPreview() {
     heightDp = 731,
     showBackground = true)
 @Composable
-private fun  CoopListContentPreview() {
+private fun  UserListContentPreview() {
     EggIncCompanionTheme {
-        CoopListContentBody(loadFakeUsers().first().contracts!!)
+        UserListContentBody(
+            loadFakeUsers()
+        )
     }
 }
 
@@ -137,9 +150,11 @@ private fun  CoopListContentPreview() {
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true)
 @Composable
-private fun CoopListPreview() {
+private fun UserListPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        CoopListContentBody(loadFakeUsers().first().contracts!!)
+        UserListContentBody(
+            loadFakeUsers()
+        )
     }
 }
 
@@ -150,7 +165,10 @@ private fun CoopListPreview() {
 @Composable
 private fun FullUiRefreshingPreview() {
     EggIncCompanionTheme {
-        CoopList(BlockingFakeDataRepository(ContextAmbient.current), true)
+        UserList(
+            BlockingFakeDataRepository(ContextAmbient.current),
+            true
+        )
     }
 }
 
@@ -161,11 +179,23 @@ private fun FullUiRefreshingPreview() {
 @Composable
 private fun FullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
-        CoopList(BlockingFakeDataRepository(ContextAmbient.current), false)
+        UserList(
+            BlockingFakeDataRepository(ContextAmbient.current),
+            false
+        )
     }
 }
 
+@Preview("Test",
+    widthDp = 411,
+    heightDp = 731,
+    showBackground = true)
 @Composable
-private fun loadFakeUsers(): List<User> {
-    return previewDataFrom(BlockingFakeDataRepository(ContextAmbient.current)::getUsers)
+private fun Test() {
+    EggIncCompanionTheme {
+        Column{
+            Text(researchItem1.id)
+            Text(simulationContract1.commonResearchList.firstOrNull()?.id ?: "null")
+        }
+    }
 }

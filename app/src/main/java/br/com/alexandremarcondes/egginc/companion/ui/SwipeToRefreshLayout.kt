@@ -36,16 +36,10 @@ import androidx.ui.foundation.animation.AnchorsFlingConfig
 import androidx.ui.foundation.animation.fling
 import androidx.ui.foundation.gestures.DragDirection
 import androidx.ui.foundation.gestures.draggable
-import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.Stack
 import androidx.ui.layout.offset
-import androidx.ui.layout.padding
-import androidx.ui.layout.preferredSize
-import androidx.ui.material.CircularProgressIndicator
-import androidx.ui.material.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import br.com.alexandremarcondes.egginc.companion.UserList
 
 private val SWIPE_DISTANCE_SIZE = 100.dp
 private const val SWIPE_DOWN_OFFSET = 1.2f
