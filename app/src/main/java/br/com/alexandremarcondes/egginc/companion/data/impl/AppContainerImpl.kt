@@ -5,7 +5,7 @@ import android.os.Looper
 import android.os.Handler
 import br.com.alexandremarcondes.egginc.companion.data.AppDatabase
 import br.com.alexandremarcondes.egginc.companion.data.IAppContainer
-import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -29,7 +29,7 @@ class AppContainerImpl(private val applicationContext: Context) : IAppContainer 
     }
 
     // Fake data repository
-    override val dataRepository: DataRepository by lazy {
+    override val dataRepository: IDataRepository by lazy {
         FakeDataRepository(
             executorService = executorService,
             resultThreadHandler = mainThreadHandler,

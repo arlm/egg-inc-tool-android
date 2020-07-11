@@ -18,7 +18,7 @@ import androidx.ui.text.style.TextAlign
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
-import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
 import br.com.alexandremarcondes.egginc.companion.data.model.User
@@ -44,7 +44,7 @@ class UserListActivity : AppCompatActivity() {
 }
 
 @Composable
-fun UserList(repository: DataRepository, refreshingState: Boolean) {
+fun UserList(repository: IDataRepository, refreshingState: Boolean) {
     if (refreshingState) {
         Loading("user list")
     } else {
@@ -166,7 +166,7 @@ private fun UserListPreview() {
 private fun FullUiRefreshingPreview() {
     EggIncCompanionTheme {
         UserList(
-            BlockingFakeDataRepository(ContextAmbient.current),
+            BlockingFakeDataRepository.DataRepository,
             true
         )
     }
@@ -180,7 +180,7 @@ private fun FullUiRefreshingPreview() {
 private fun FullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
         UserList(
-            BlockingFakeDataRepository(ContextAmbient.current),
+            BlockingFakeDataRepository.DataRepository,
             false
         )
     }

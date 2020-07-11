@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.stateFor
 import androidx.ui.core.Alignment
-import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Image
@@ -19,7 +18,7 @@ import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
-import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
@@ -43,7 +42,7 @@ class CoopListActivity : AppCompatActivity() {
 }
 
 @Composable
-fun CoopList(repository: DataRepository, refreshingState: Boolean) {
+fun CoopList(repository: IDataRepository, refreshingState: Boolean) {
     if (refreshingState) {
         Loading("coop list")
     } else {
@@ -88,9 +87,7 @@ private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             myContracts.contractsList.forEach { contract ->
-                CoopListItem(
-                    contract
-                )
+                CoopListItem(contract)
                 Divider()
             }
         }
@@ -99,7 +96,7 @@ private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
 
 @Composable
 private fun CoopListItem(localContract: ei.Ei.LocalContract) {
-    val egg = Egg.getByEgg(localContract.contract.egg) ?: Egg.UNKNOWN
+    val egg = Egg.convert(localContract.contract.egg) ?: Egg.UNKNOWN
     val icon = imageResource(egg.resource)
 
     if (localContract.contract.coopAllowed) {
@@ -169,7 +166,7 @@ private fun CoopListPreview() {
 private fun CoopListFullUiRefreshingPreview() {
     EggIncCompanionTheme {
         CoopList(
-            BlockingFakeDataRepository(ContextAmbient.current),
+            BlockingFakeDataRepository.DataRepository,
             true
         )
     }
@@ -183,7 +180,7 @@ private fun CoopListFullUiRefreshingPreview() {
 private fun CoopListFullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
         CoopList(
-            BlockingFakeDataRepository(ContextAmbient.current),
+            BlockingFakeDataRepository.DataRepository,
             false
         )
     }

@@ -31,6 +31,6 @@ enum class Egg(val resource: Int, val egg: Ei.Egg) {
     PUMPKIN(R.drawable.egg_pumpkin, Ei.Egg.PUMPKIN);
 
     companion object {
-        fun getByEgg(value: Ei.Egg) = values().lastOrNull() { it.egg == value }
+        fun convert(value: Ei.Egg) = values().lastOrNull { it.egg == value } ?: UNKNOWN
     }
 }

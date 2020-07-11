@@ -11,7 +11,7 @@ import org.junit.Test
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+class ServiceUnitTest {
 
     @Test
     fun firstContact() {

@@ -8,8 +8,6 @@ import br.com.alexandremarcondes.egginc.companion.data.model.User
 @Composable
 fun loadFakeUsers(): List<User> {
     return previewDataFrom(
-        BlockingFakeDataRepository(
-            ContextAmbient.current
-        )::getUsers
+        BlockingFakeDataRepository.DataRepository::getUsers
     )
 }

@@ -1,6 +1,6 @@
 package br.com.alexandremarcondes.egginc.companion.data.impl
 
-import br.com.alexandremarcondes.egginc.companion.data.model.User
+import br.com.alexandremarcondes.egginc.companion.data.model.*
 import ei.Ei
 
 val achievementInfo1: Ei.Backup.AchievementInfo = Ei.Backup.AchievementInfo.newBuilder()
@@ -594,11 +594,57 @@ val backup5: Ei.Backup = Ei.Backup.newBuilder()
     .setContracts(myContracts)
     .build()
 
+val fakeGoal1 = ContractGoal(
+    type = GoalType.EGGS_LAID,
+    targetAmount = 100.0,
+    targetSoulEggs = 5.0,
+    rewardType = RewardType.SOUL_EGGS,
+    rewardAmount = 10.0,
+    rewardSubType = "soulegg"
+)
+
+val fakeGoal2 = ContractGoal(
+    type = GoalType.EGGS_LAID,
+    targetAmount = 100.0,
+    targetSoulEggs = 5.0,
+    rewardType = RewardType.CASH,
+    rewardAmount = 10.0,
+    rewardSubType = "soulegg"
+)
+
+val fakeGoal3 = ContractGoal(
+    type = GoalType.EGGS_LAID,
+    targetAmount = 100.0,
+    targetSoulEggs = 5.0,
+    rewardType = RewardType.EPIC_RESEARCH_ITEM,
+    rewardAmount = 10.0,
+    rewardSubType = "soulegg"
+)
+
+val fakeContract1 = Contract(
+    identifier = "contract1",
+    name = "contract 1",
+    description = "contract 1 description",
+    egg = Egg.ANTIMATTER,
+    goals = listOf(fakeGoal1, fakeGoal2, fakeGoal3),
+    coopAllowed = true,
+    maxCoopSize = 10,
+    maxBoosts = 4,
+    maxSoulEggs = 4.0,
+    expirationTime = 1595858460.1665452,
+    lengthSeconds = 604800.0,
+    minClientVersion = 26
+)
+
 val user1 = User().applyFrom(deviceInfo1).applyFrom(backup1)
 val user2 = User().applyFrom(deviceInfo2).applyFrom(backup2)
 val user3 = User().applyFrom(deviceInfo3).applyFrom(backup3)
 val user4 = User().applyFrom(deviceInfo4).applyFrom(backup4)
 val user5 = User().applyFrom(deviceInfo5).applyFrom(backup5)
+
+val myContract1 = Contract().applyFrom(contract1)
+val myContract2 = Contract().applyFrom(contract2)
+val myContract3 = Contract().applyFrom(contract3)
 
 val fakeUsers: List<User> =
     listOf(
@@ -607,4 +653,11 @@ val fakeUsers: List<User> =
         user3,
         user4,
         user5
+    )
+
+val fakeContracts: List<Contract> =
+    listOf(
+        myContract1,
+        myContract2,
+        myContract3
     )

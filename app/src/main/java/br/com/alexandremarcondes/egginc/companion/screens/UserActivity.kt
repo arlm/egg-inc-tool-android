@@ -15,7 +15,7 @@ import androidx.ui.layout.Stack
 import androidx.ui.layout.fillMaxSize
 import androidx.ui.tooling.preview.Preview
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
-import br.com.alexandremarcondes.egginc.companion.data.DataRepository
+import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.researchItem1
 import br.com.alexandremarcondes.egginc.companion.data.impl.simulationContract1
@@ -40,7 +40,7 @@ class UserActivity : AppCompatActivity() {
 }
 
 @Composable
-fun UserData(repository: DataRepository, refreshingState: Boolean) {
+fun UserData(repository: IDataRepository, refreshingState: Boolean) {
     if (refreshingState) {
         Loading("user data")
     } else {
@@ -97,7 +97,7 @@ private fun UserContentBody(users: List<User>) {
 private fun UserFullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
         UserList(
-            BlockingFakeDataRepository(ContextAmbient.current),
+            BlockingFakeDataRepository,
             false
         )
     }
