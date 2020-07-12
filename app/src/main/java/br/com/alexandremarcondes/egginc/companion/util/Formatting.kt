@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
@@ -20,9 +21,13 @@ fun Double.formatMagnitude(): String {
 
 fun LocalDateTime.toShortDateTime() = this.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
 
+fun LocalDateTime.fromNow(): String = LocalDateTime.now().until(this, ChronoUnit.SECONDS).formatSeconds()
+
 fun Double.toDateTime(): LocalDateTime = Instant.ofEpochSecond(this.toLong())
     .atZone(ZoneId.systemDefault())
     .toLocalDateTime()
+
+fun Long.formatSeconds(): String = this.toDouble().formatSeconds()
 
 fun Long.formatMagnitude(): String = this.toDouble().formatMagnitude()
 

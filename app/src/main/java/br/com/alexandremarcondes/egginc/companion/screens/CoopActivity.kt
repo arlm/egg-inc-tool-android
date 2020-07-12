@@ -10,7 +10,6 @@ import androidx.ui.core.setContent
 import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
-import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.res.imageResource
 import androidx.ui.text.font.FontWeight
@@ -20,15 +19,11 @@ import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
 import br.com.alexandremarcondes.egginc.companion.R
 import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
-import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.fakeContract1
 import br.com.alexandremarcondes.egginc.companion.data.model.Contract
 import br.com.alexandremarcondes.egginc.companion.data.model.ContractGoal
 import br.com.alexandremarcondes.egginc.companion.ui.*
-import br.com.alexandremarcondes.egginc.companion.util.format
-import br.com.alexandremarcondes.egginc.companion.util.formatSeconds
-import br.com.alexandremarcondes.egginc.companion.util.toDateTime
-import br.com.alexandremarcondes.egginc.companion.util.toShortDateTime
+import br.com.alexandremarcondes.egginc.companion.util.*
 
 class CoopActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +45,7 @@ class CoopActivity : AppCompatActivity() {
 @Composable
 fun CoopData(repository: IDataRepository, refreshingState: Boolean) {
     if (refreshingState) {
-        Loading("user data")
+        Loading("coop data")
     } else {
         val (state, refreshPosts) = refreshableUiStateFrom(repository::getContracts)
 
@@ -97,8 +92,7 @@ private fun CoopContentBody(contract: Contract) {
 
 @Composable
 private fun CoopTitle(contract: Contract) {
-    val egg = contract.egg
-    val icon = imageResource(egg.resource)
+    val icon = imageResource(contract.egg.resource)
 
     ConstraintLayout(modifier = Modifier.fillMaxWidth()){
         val (egg, title, description) = createRefs()
@@ -106,7 +100,8 @@ private fun CoopTitle(contract: Contract) {
         Image(icon, modifier = Modifier
             .preferredSize(56.dp, 56.dp)
             .constrainAs(egg) {
-                top.linkTo(parent.top, margin = 5.dp)
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
             }
         )
         Text(contract.name,
@@ -144,25 +139,25 @@ private fun CoopFooter(contract: Contract) {
                     start.linkTo(parent.start)
                 }
         )
-        Text("${contract.lengthSeconds.formatSeconds()} minutes per Token",
+        Text("${contract.lengthSeconds.formatSeconds()} per Token",
             modifier = Modifier
                 .constrainAs(tokens) {
-                    top.linkTo(parent.top)
+                    top.linkTo(coop.bottom)
                     end.linkTo(parent.end)
                 }
         )
         Text("Duration: ${contract.lengthSeconds.formatSeconds()}",
             modifier = Modifier
                 .constrainAs(timing) {
-                    top.linkTo(tokens.bottom)
+                    top.linkTo(coop.bottom)
                     start.linkTo(parent.start)
                 }
         )
-        Text("Expires in ${contract.expirationTime.toDateTime().toShortDateTime()}",
+        Text("Expires in ${contract.expirationTime.toDateTime().fromNow()}",
             modifier = Modifier
                 .constrainAs(expires) {
-                    top.linkTo(tokens.bottom)
-                    end.linkTo(parent.end)
+                    top.linkTo(timing.bottom)
+                    start.linkTo(parent.start)
                 }
         )
     }
