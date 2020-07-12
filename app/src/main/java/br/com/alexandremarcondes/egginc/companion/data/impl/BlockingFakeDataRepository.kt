@@ -7,8 +7,8 @@ import br.com.alexandremarcondes.egginc.companion.data.model.Contract
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 
 class BlockingFakeDataRepository {
-    fun getUser(deviceId: String): User? =
-        fakeUsers.find { it.deviceInfo?.deviceId ?: "" == deviceId }
+    fun getUser(userId: String): User? =
+        fakeUsers.find { it.userId == userId }
 
     fun getUsers(): List<User> = fakeUsers
 
@@ -18,8 +18,8 @@ class BlockingFakeDataRepository {
     fun getContracts(): List<Contract> = fakeContracts
 
     companion object DataRepository : IDataRepository {
-        override fun getUser(deviceId: String, callback: (Result<User?>) -> Unit) =
-            callback(Result.Success(fakeUsers.find { it.deviceInfo?.deviceId ?: "" == deviceId }))
+        override fun getUser(userId: String, callback: (Result<User?>) -> Unit) =
+            callback(Result.Success(fakeUsers.find { it.userId == userId }))
 
         override fun getUsers(callback: (Result<List<User>>) -> Unit) =
             callback(Result.Success(fakeUsers))

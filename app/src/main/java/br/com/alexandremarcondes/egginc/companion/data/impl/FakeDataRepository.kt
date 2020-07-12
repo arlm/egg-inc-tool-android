@@ -15,11 +15,11 @@ class FakeDataRepository(
     private val resources: Resources
 ) : IDataRepository {
 
-    override fun getUser(deviceId: String, callback: (Result<User?>) -> Unit) {
+    override fun getUser(userId: String, callback: (Result<User?>) -> Unit) {
         executeInBackground(callback) {
             resultThreadHandler.post {
                 callback(Result.Success(
-                    fakeUsers.find { it.deviceInfo?.deviceId ?: "" == deviceId }
+                    fakeUsers.find { it.userId == userId }
                 ))
             }
         }
