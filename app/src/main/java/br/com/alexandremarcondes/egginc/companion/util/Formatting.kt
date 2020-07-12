@@ -1,18 +1,30 @@
 package br.com.alexandremarcondes.egginc.companion.util
 
+import br.com.alexandremarcondes.egginc.companion.data.model.Magnitude
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+fun Double.formatMagnitude(): String {
+    val exp = log10(this) - log10(this) % 3
+    val number = this / 10.0.pow(exp)
+    return if (exp >= 6)  "%.3f".format(number) + (Magnitude.fromDouble(this)?.suffix ?: "") else  "%.0f".format(this)
+}
+
 fun LocalDateTime.toShortDateTime() = this.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
 
 fun Double.toDateTime(): LocalDateTime = Instant.ofEpochSecond(this.toLong())
     .atZone(ZoneId.systemDefault())
     .toLocalDateTime()
+
+fun Long.formatMagnitude(): String = this.toDouble().formatMagnitude()
 
 fun Double.formatSeconds(): String {
     val sb = StringBuilder()

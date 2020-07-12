@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.stateFor
 import androidx.ui.core.Alignment
-import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
 import androidx.ui.foundation.Text
@@ -20,7 +19,7 @@ import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
 import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepository
-import br.com.alexandremarcondes.egginc.companion.data.model.FarmerLevel
+import br.com.alexandremarcondes.egginc.companion.data.model.Magnitude
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.data.impl.researchItem1
 import br.com.alexandremarcondes.egginc.companion.data.impl.simulationContract1
@@ -110,7 +109,7 @@ private fun UserListItem(user: User) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text("${user.userName} (ID: ${user.userId})",
                 modifier = Modifier.weight(0.66f, true))
-                Text("${FarmerLevel.fromDouble(user.game?.currentMultiplier ?: 0.0)}",
+                Text("${Magnitude.fromDouble(user.game?.currentMultiplier ?: 0.0)}",
                 modifier = Modifier.weight(0.33f, false),
                 textAlign = TextAlign.Right)
             }
