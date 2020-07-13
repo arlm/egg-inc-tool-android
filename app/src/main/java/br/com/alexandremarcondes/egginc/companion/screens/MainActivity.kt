@@ -1,7 +1,9 @@
 package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.Surface
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,13 +28,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val app = application as EggIncCompanionApp
+        val rotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            display!!.rotation
+        else
+            resources.configuration.orientation
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val heightPx = displayMetrics.heightPixels
+        val widthPx = displayMetrics.widthPixels
 
         setContent {
             EggIncCompanionTheme {
                 AppContent(
                     navigationViewModel = navigationViewModel,
                     app = app.container,
-                    rotation = display!!.rotation
+                    rotation = rotation,
+                    widthPx = widthPx,
+                    heightPx = heightPx
                 )
             }
         }
@@ -43,7 +56,9 @@ class MainActivity : AppCompatActivity() {
 private  fun AppContent(
     navigationViewModel: NavigationViewModel,
     app: IAppContainer,
-    rotation: Int) {
+    rotation: Int,
+    widthPx: Int,
+    heightPx: Int) {
     onActive {
         val scope = CoroutineScope((Dispatchers.Main))
 
@@ -82,7 +97,9 @@ private  fun AppContent(
 
                 is Screen.CoopList -> CoopList(
                     repository = app.dataRepository,
-                    refreshingState = false
+                    refreshingState = false,
+                    widthPx =  widthPx,
+                    heightPx = heightPx
                 )
 
                 is Screen.User -> TODO()

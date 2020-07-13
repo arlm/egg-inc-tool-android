@@ -2,15 +2,15 @@ package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.Composable
-import androidx.compose.stateFor
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.core.setContent
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.VerticalScroller
+import androidx.compose.*
+import androidx.ui.animation.animatedFloat
+import androidx.ui.core.*
+import androidx.ui.foundation.*
+import androidx.ui.foundation.gestures.DragDirection
+import androidx.ui.foundation.gestures.draggable
+import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
 import androidx.ui.material.ListItem
@@ -23,6 +23,8 @@ import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepo
 import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
+import ei.Ei
+
 
 class CoopListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +32,18 @@ class CoopListActivity : AppCompatActivity() {
 
         val appContainer = (application as EggIncCompanionApp).container
 
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val heightPx = displayMetrics.heightPixels
+        val widthPx = displayMetrics.widthPixels
+
         setContent {
             EggIncCompanionTheme {
                 CoopList(
                     appContainer.dataRepository,
-                    false
+                    false,
+                    widthPx,
+                    heightPx
                 )
             }
         }
@@ -42,7 +51,12 @@ class CoopListActivity : AppCompatActivity() {
 }
 
 @Composable
-fun CoopList(repository: IDataRepository, refreshingState: Boolean) {
+fun CoopList(
+    repository: IDataRepository,
+    refreshingState: Boolean,
+    widthPx: Int,
+    heightPx: Int
+) {
     if (refreshingState) {
         Loading("coop list")
     } else {
@@ -53,15 +67,16 @@ fun CoopList(repository: IDataRepository, refreshingState: Boolean) {
             onRefresh = { refreshPosts() },
             refreshIndicator = { RefreshIndicator() }
         ) {
-            CoopListContent(
-                state
-            )
+            CoopListContent(state, widthPx, heightPx)
         }
     }
 }
 
 @Composable
-private fun CoopListContent(state: RefreshableUiState<List<User>>) {
+private fun CoopListContent(
+    state: RefreshableUiState<List<User>>,
+    widthPx: Int, heightPx: Int
+) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
@@ -69,7 +84,9 @@ private fun CoopListContent(state: RefreshableUiState<List<User>>) {
     Stack(modifier = Modifier.fillMaxSize()) {
         state.currentData?.let { users ->
             CoopListContentBody(
-                users.first().contracts!!
+                users.first().contracts!!,
+                widthPx,
+                heightPx
             )
         }
 
@@ -83,11 +100,14 @@ private fun CoopListContent(state: RefreshableUiState<List<User>>) {
 }
 
 @Composable
-private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
+private fun CoopListContentBody(
+    myContracts: Ei.MyContracts,
+    widthPx: Int, heightPx: Int
+) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             myContracts.contractsList.forEach { contract ->
-                CoopListItem(contract)
+                CoopListItem(contract, widthPx, heightPx)
                 Divider()
             }
         }
@@ -95,38 +115,52 @@ private fun CoopListContentBody(myContracts: ei.Ei.MyContracts) {
 }
 
 @Composable
-private fun CoopListItem(localContract: ei.Ei.LocalContract) {
-    val egg = Egg.convert(localContract.contract.egg) ?: Egg.UNKNOWN
+private fun CoopListItem(
+    localContract: Ei.LocalContract,
+    widthPx: Int, heightPx: Int
+) {
+    val egg = Egg.convert(localContract.contract.egg)
     val icon = imageResource(egg.resource)
+    val min = -widthPx * 2 / 3
+    val max = widthPx * 2 / 3
+    val (minPx, maxPx) = with(DensityAmbient.current) { min.toFloat() to max.toFloat() }
+    var position = animatedFloat(0f)
+    position.setBounds(minPx, maxPx)
 
-    if (localContract.contract.coopAllowed) {
-        val coopText = if (localContract.accepted) "Coop: ${localContract.coopIdentifier}" else "Contract not accepted"
+    Box (modifier = Modifier
+            .fillMaxWidth()
+            .draggable(enabled = true, dragDirection = DragDirection.Horizontal) { delta ->
+                    // consume only delta that needed if we hit bounds
+                    val old = position.value
+                    position.snapTo(position.value + delta)
+                    position.value - old
+                }) {
+        val text = if (localContract.contract.coopAllowed) {
+            if (localContract.accepted) "Coop: ${localContract.coopIdentifier}" else "Contract not accepted"
+        } else {
+            "Solo contract"
+        }
+        val xOffset =  with(DensityAmbient.current) { position.value.toDp() }
+
         ListItem(
+            modifier = Modifier.offset(x = xOffset, y = 0.dp),
             text = { Text(localContract.contract.name) },
             secondaryText = { Text(localContract.contract.description) },
             singleLineSecondaryText = true,
-            overlineText = { Text(coopText) },
-            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
-        )
-
-    } else {
-        ListItem(
-            text = { Text(localContract.contract.name) },
-            secondaryText = { Text(localContract.contract.description) },
-            singleLineSecondaryText = true,
-            overlineText = { Text("Solo contract") },
-            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp) ) }
+            overlineText = { Text(text) },
+            icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp)) }
         )
     }
 }
-
 
 @Preview("Card", group = "Elements")
 @Composable
 private fun  CoopListItemPreview() {
     EggIncCompanionTheme {
         CoopListItem(
-            loadFakeUsers().first().contracts!!.contractsList.first()
+            loadFakeUsers().first().contracts!!.contractsList.first(),
+            411,
+            731
         )
     }
 }
@@ -139,7 +173,9 @@ private fun  CoopListItemPreview() {
 private fun  CoopListContentPreview() {
     EggIncCompanionTheme {
         CoopListContentBody(
-            loadFakeUsers().first().contracts!!
+            loadFakeUsers().first().contracts!!,
+            411,
+            731
         )
     }
 }
@@ -153,7 +189,9 @@ private fun  CoopListContentPreview() {
 private fun CoopListPreview() {
     EggIncCompanionTheme(darkTheme = true) {
         CoopListContentBody(
-            loadFakeUsers().first().contracts!!
+            loadFakeUsers().first().contracts!!,
+            411,
+            731
         )
     }
 }
@@ -167,7 +205,9 @@ private fun CoopListFullUiRefreshingPreview() {
     EggIncCompanionTheme {
         CoopList(
             BlockingFakeDataRepository.DataRepository,
-            true
+            true,
+            411,
+            731
         )
     }
 }
@@ -181,7 +221,9 @@ private fun CoopListFullUiNonRefreshingPreview() {
     EggIncCompanionTheme {
         CoopList(
             BlockingFakeDataRepository.DataRepository,
-            false
+            false,
+            411,
+            731
         )
     }
 }
