@@ -6,6 +6,7 @@ import android.os.Handler
 import br.com.alexandremarcondes.egginc.companion.data.AppDatabase
 import br.com.alexandremarcondes.egginc.companion.data.IAppContainer
 import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
+import br.com.alexandremarcondes.egginc.companion.data.model.LegacyContracts
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -26,6 +27,10 @@ class AppContainerImpl(private val applicationContext: Context) : IAppContainer 
      // Rooms Database instance used by the rest of classes to obtain dependencies
      override val database: AppDatabase by lazy {
          AppDatabase.getDatabase(applicationContext)
+    }
+
+    override val legacyContracts: LegacyContracts by lazy {
+        LegacyContracts(applicationContext)
     }
 
     // Fake data repository

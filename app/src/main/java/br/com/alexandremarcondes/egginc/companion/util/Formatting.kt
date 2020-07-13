@@ -23,10 +23,6 @@ fun LocalDateTime.toShortDateTime() = this.format(DateTimeFormatter.ofPattern("d
 
 fun LocalDateTime.fromNow(): String = LocalDateTime.now().until(this, ChronoUnit.SECONDS).formatSeconds()
 
-fun Double.toDateTime(): LocalDateTime = Instant.ofEpochSecond(this.toLong())
-    .atZone(ZoneId.systemDefault())
-    .toLocalDateTime()
-
 fun Long.formatSeconds(): String = this.toDouble().formatSeconds()
 
 fun Long.formatMagnitude(): String = this.toDouble().formatMagnitude()
