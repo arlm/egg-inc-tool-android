@@ -3,14 +3,22 @@ package br.com.alexandremarcondes.egginc.companion.screens
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.DisplayMetrics
+import androidx.animation.TargetAnimation
+import androidx.animation.fling
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.*
+import androidx.compose.Composable
+import androidx.compose.stateFor
 import androidx.ui.animation.animatedFloat
-import androidx.ui.core.*
-import androidx.ui.foundation.*
+import androidx.ui.core.Alignment
+import androidx.ui.core.DensityAmbient
+import androidx.ui.core.Modifier
+import androidx.ui.core.setContent
+import androidx.ui.foundation.Box
+import androidx.ui.foundation.Image
+import androidx.ui.foundation.Text
+import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.gestures.DragDirection
 import androidx.ui.foundation.gestures.draggable
-import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
 import androidx.ui.material.ListItem
@@ -125,16 +133,23 @@ private fun CoopListItem(
     val max = widthPx * 2 / 3
     val (minPx, maxPx) = with(DensityAmbient.current) { min.toFloat() to max.toFloat() }
     var position = animatedFloat(0f)
-    position.setBounds(minPx, maxPx)
 
     Box (modifier = Modifier
             .fillMaxWidth()
-            .draggable(enabled = true, dragDirection = DragDirection.Horizontal) { delta ->
+            .draggable(
+                dragDirection = DragDirection.Horizontal,
+                onDragStopped = {
+                    position.fling(1f, adjustTarget = {
+                        TargetAnimation(0f)
+                    })
+                }
+            ) { delta ->
                     // consume only delta that needed if we hit bounds
                     val old = position.value
-                    position.snapTo(position.value + delta)
+                    position.snapTo((position.value + delta).coerceIn(minPx, maxPx))
                     position.value - old
-                }) {
+            }
+    ) {
         val text = if (localContract.contract.coopAllowed) {
             if (localContract.accepted) "Coop: ${localContract.coopIdentifier}" else "Contract not accepted"
         } else {
