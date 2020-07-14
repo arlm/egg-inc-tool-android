@@ -13,15 +13,19 @@ import androidx.ui.core.Alignment
 import androidx.ui.core.DensityAmbient
 import androidx.ui.core.Modifier
 import androidx.ui.core.setContent
-import androidx.ui.foundation.Box
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.*
 import androidx.ui.foundation.gestures.DragDirection
 import androidx.ui.foundation.gestures.draggable
+import androidx.ui.foundation.shape.corner.CutCornerShape
+import androidx.ui.graphics.Color
 import androidx.ui.layout.*
+import androidx.ui.material.Button
 import androidx.ui.material.Divider
 import androidx.ui.material.ListItem
+import androidx.ui.material.MaterialTheme
+import androidx.ui.material.icons.Icons
+import androidx.ui.material.icons.filled.Delete
+import androidx.ui.material.icons.filled.PersonAdd
 import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -32,9 +36,10 @@ import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
 import ei.Ei
-
+import kotlin.math.abs
 
 class CoopListActivity : AppCompatActivity() {
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -116,7 +121,7 @@ private fun CoopListContentBody(
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             myContracts.contractsList.forEach { contract ->
                 CoopListItem(contract, widthPx, heightPx)
-                Divider()
+                Divider(color = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray )
             }
         }
     }
@@ -129,19 +134,34 @@ private fun CoopListItem(
 ) {
     val egg = Egg.convert(localContract.contract.egg)
     val icon = imageResource(egg.resource)
-    val min = -widthPx * 2 / 3
-    val max = widthPx * 2 / 3
-    val (minPx, maxPx) = with(DensityAmbient.current) { min.toFloat() to max.toFloat() }
-    var position = animatedFloat(0f)
+    val size = widthPx * 2 / 3
+    val draggingLimit = size / 2
+    val buttonWidth = widthPx / 3 * 0.75
+    val (minPx, maxPx) = with(DensityAmbient.current) { (-size).toFloat() to size.toFloat() }
+    val position = animatedFloat(0f)
+    var oldPosition = 0f
 
-    Box (modifier = Modifier
+    Stack (modifier = Modifier
             .fillMaxWidth()
+            .preferredHeight(88.dp)
             .draggable(
                 dragDirection = DragDirection.Horizontal,
+                onDragStarted = { oldPosition = position.value },
                 onDragStopped = {
-                    position.fling(1f, adjustTarget = {
-                        TargetAnimation(0f)
-                    })
+                    var target: Float
+
+                    if (position.targetValue < 0 && position.targetValue > -draggingLimit)
+                        target = 0f
+                    else if (position.targetValue <= -draggingLimit)
+                        target = if (oldPosition == (-size).toFloat()) 0f else (-size).toFloat()
+                    else if (position.targetValue > 0 && position.targetValue < draggingLimit)
+                        target = 0f
+                    else
+                        target = if (oldPosition == size.toFloat()) 0f else (size).toFloat()
+
+                    position.fling(1f,
+                        adjustTarget = { TargetAnimation(target) }
+                    )
                 }
             ) { delta ->
                     // consume only delta that needed if we hit bounds
@@ -155,14 +175,68 @@ private fun CoopListItem(
         } else {
             "Solo contract"
         }
+
         val xOffset =  with(DensityAmbient.current) { position.value.toDp() }
 
+        ConstraintLayout(modifier = Modifier.fillMaxSize().drawBackground(Color.Yellow)) {
+            val (leftButton, rightButton) = createRefs()
+            Button(
+                modifier = Modifier
+                    .preferredWidth(buttonWidth.dp)
+                    .constrainAs(leftButton) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        height = Dimension.fillToConstraints
+                    },
+                backgroundColor = Color.Red,
+                shape = CutCornerShape(0.dp),
+                onClick = {}
+            ) {
+                Column {
+                    Icon(Icons.Filled.Delete,
+                        tint = Color.White,
+                        modifier = Modifier.gravity(Alignment.CenterHorizontally))
+                    Text("Remove",
+                        color = Color.White,
+                        modifier = Modifier.gravity(Alignment.CenterHorizontally))
+                }
+            }
+            Spacer(modifier = Modifier)
+            Button(
+                modifier = Modifier
+                    .width(buttonWidth.dp)
+                    .fillMaxHeight()
+                    .constrainAs(rightButton) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                    },
+                backgroundColor = Color(0xFF2b9348),
+                shape = CutCornerShape(0.dp),
+                onClick = {}
+                ) {
+                Column {
+                    Icon(Icons.Filled.PersonAdd,
+                        tint = Color.White,
+                        modifier = Modifier.gravity(Alignment.CenterHorizontally))
+                    Text("Create\nGroups",
+                        color = Color.White,
+                        modifier = Modifier.gravity(Alignment.CenterHorizontally))
+                }
+            }
+        }
         ListItem(
-            modifier = Modifier.offset(x = xOffset, y = 0.dp),
-            text = { Text(localContract.contract.name) },
-            secondaryText = { Text(localContract.contract.description) },
+            modifier = Modifier
+                .offset(x = xOffset, y = 0.dp)
+                .drawBackground(MaterialTheme.colors.background),
+            text = { Text(localContract.contract.name,
+                color = MaterialTheme.colors.onBackground) },
+            secondaryText = { Text(localContract.contract.description,
+                color = MaterialTheme.colors.onBackground) },
             singleLineSecondaryText = true,
-            overlineText = { Text(text) },
+            overlineText = { Text(text,
+                color = MaterialTheme.colors.onBackground) },
             icon = { Image(icon, modifier = Modifier.preferredSize(56.dp, 56.dp)) }
         )
     }
