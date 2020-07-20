@@ -1,14 +1,14 @@
 package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
+import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.view.Surface
 import androidx.compose.Composable
 import androidx.ui.core.Alignment
 import androidx.ui.core.ContentScale
 import androidx.ui.core.Modifier
-import androidx.ui.foundation.Image
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.clickable
+import androidx.ui.foundation.*
 import androidx.ui.graphics.ImageAsset
 import androidx.ui.layout.*
 import androidx.ui.layout.RowScope.gravity
@@ -27,7 +27,7 @@ import br.com.alexandremarcondes.egginc.companion.ui.Screen
 @Composable
 fun Home(rotation: Int, navigateTo: (Screen) -> Unit) {
     when (rotation) {
-        Surface.ROTATION_0, Surface.ROTATION_180 ->
+        ORIENTATION_PORTRAIT ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -38,7 +38,7 @@ fun Home(rotation: Int, navigateTo: (Screen) -> Unit) {
                     navigateTo
                 )
             }
-        Surface.ROTATION_90, Surface.ROTATION_270 ->
+        ORIENTATION_LANDSCAPE ->
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -71,15 +71,14 @@ private fun HomeContent(portrait: Boolean = false, navigateTo: (Screen) -> Unit)
 @Composable
 private fun HomeCard(image: ImageAsset, title: String, subTitle: String, portrait: Boolean, onClick: () -> Unit) {
     val constraint = if (portrait)
-        Modifier.preferredSize(280.dp,240.dp).gravity(
-            Alignment.CenterVertically
-        )
+        Modifier.fillMaxHeight().gravity(Alignment.CenterVertically)
     else
-        Modifier.fillMaxWidth().preferredHeight(240.dp)
+        Modifier.fillMaxWidth()
 
     Card(
         shape = MaterialTheme.shapes.medium,
         modifier = constraint
+            .aspectRatio(4f/3f)
             .padding(4.dp)
             .clickable(onClick = onClick),
         elevation = 6.dp
@@ -88,14 +87,12 @@ private fun HomeCard(image: ImageAsset, title: String, subTitle: String, portrai
             Image(
                 asset = image,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .preferredHeight(140.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().weight(0.8f, portrait )
             )
             Column(
-                modifier = Modifier.padding(
-                    16.dp
-                )
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.4f)
             ) {
                 val emphasisLevels = EmphasisAmbient.current
                 ProvideEmphasis(emphasisLevels.high) {
@@ -118,7 +115,7 @@ private fun HomeCard(image: ImageAsset, title: String, subTitle: String, portrai
 }
 
 
-@Preview("Default Colors",
+@Preview("Default Colors Portrait",
     group = "Portrait",
     widthDp = 411,
     heightDp = 731,
@@ -126,11 +123,13 @@ private fun HomeCard(image: ImageAsset, title: String, subTitle: String, portrai
 @Composable
 private fun HomePortraitPreview() {
     EggIncCompanionTheme {
-        Home(Surface.ROTATION_0) {}
+        VerticalScroller(modifier = Modifier.fillMaxWidth()) {
+            Home(ORIENTATION_PORTRAIT) {}
+        }
     }
 }
 
-@Preview("Dark Colors",
+@Preview("Dark Colors Portrait",
     group = "Portrait",
     widthDp = 411,
     heightDp = 731,
@@ -139,11 +138,13 @@ private fun HomePortraitPreview() {
 @Composable
 private fun HomePortraitDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        Home(Surface.ROTATION_180) {}
+        VerticalScroller(modifier = Modifier.fillMaxWidth()) {
+            Home(ORIENTATION_PORTRAIT) {}
+        }
     }
 }
 
-@Preview("Default Colors",
+@Preview("Default Colors Lanscape",
     group ="Lanscape",
     widthDp = 731,
     heightDp = 411,
@@ -151,11 +152,13 @@ private fun HomePortraitDarkPreview() {
 @Composable
 private fun HomeLandscapePreview() {
     EggIncCompanionTheme {
-        Home(Surface.ROTATION_90) {}
+        HorizontalScroller(modifier = Modifier.fillMaxHeight()) {
+            Home(ORIENTATION_LANDSCAPE) {}
+        }
     }
 }
 
-@Preview("Dark Colors",
+@Preview("Dark Colors Lanscape",
     group ="Lanscape",
     showBackground = true,
     widthDp = 731,
@@ -164,6 +167,8 @@ private fun HomeLandscapePreview() {
 @Composable
 private fun HomeLandscapeDarkPreview() {
     EggIncCompanionTheme(darkTheme = true) {
-        Home(Surface.ROTATION_270) {}
+        HorizontalScroller(modifier = Modifier.fillMaxHeight()) {
+            Home(ORIENTATION_LANDSCAPE) {}
+        }
     }
 }
