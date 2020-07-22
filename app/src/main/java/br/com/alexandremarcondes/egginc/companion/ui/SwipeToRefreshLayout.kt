@@ -44,6 +44,7 @@ import androidx.ui.unit.dp
 private val SWIPE_DISTANCE_SIZE = 100.dp
 private const val SWIPE_DOWN_OFFSET = 1.2f
 
+@Suppress("RemoveEmptyParenthesesFromAnnotationEntry")
 @Composable
 fun SwipeToRefreshLayout(
     refreshingState: Boolean,
@@ -108,6 +109,7 @@ fun SwipeToRefreshLayout(
  * @param enabled whether or not this Draggable is enabled and should consume events
  */
 // TODO(malkov/tianliu) (figure our how to make it better and make public)
+@Suppress("RemoveEmptyParenthesesFromAnnotationEntry")
 @Composable
 internal fun <T> StateDraggable(
     state: T,

@@ -44,7 +44,7 @@ data class RefreshableUiStateHandler<out T>(
 
 /**
  * Refreshable UiState factory that updates its internal state with the
- * [com.example.jetnews.data.Result] of a callback passed as a parameter.
+ * [br.com.alexandremarcondes.egginc.companion.data.Result] of a callback passed as a parameter.
  *
  * To load asynchronous data, effects are better pattern than using @Model classes since
  * effects are Compose lifecycle aware.
@@ -62,12 +62,8 @@ fun <T> refreshableUiStateFrom(
         state = RefreshableUiState.Success(data = state.currentData, loading = true)
         repositoryCall { result ->
             state = when (result) {
-                is Result.Success -> RefreshableUiState.Success(
-                    data = result.data, loading = false
-                )
-                is Result.Error -> RefreshableUiState.Error(
-                    exception = result.exception, previousData = state.currentData
-                )
+                is Result.Success -> RefreshableUiState.Success(data = result.data, loading = false)
+                is Result.Error -> RefreshableUiState.Error(exception = result.exception, previousData = state.currentData)
             }
         }
     }

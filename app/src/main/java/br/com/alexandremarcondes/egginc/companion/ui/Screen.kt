@@ -23,7 +23,7 @@ sealed class Screen(val id: ScreenName) {
     data class User(val userId: String) : Screen(
         ScreenName.USER
     )
-    data class Coop(val coopId: String) : Screen(
+    data class Coop(val coopId: String, val contractId: String) : Screen(
         ScreenName.COOP
     )
 }

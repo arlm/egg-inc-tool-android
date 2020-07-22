@@ -619,6 +619,10 @@ val myContract1 = Contract().applyFrom(contract1)
 val myContract2 = Contract().applyFrom(contract2)
 val myContract3 = Contract().applyFrom(contract3)
 
+val coop1 = Coop().applyFrom(localContract1)
+val coop2 = Coop().applyFrom(localContract2)
+val coop3 = Coop().applyFrom(localContract3)
+
 val fakeUsers: List<User> =
     listOf(
         user1,
@@ -633,4 +637,11 @@ val fakeContracts: List<Contract> =
         myContract1,
         myContract2,
         myContract3
+    )
+
+val fakeCoops: List<Coop> =
+    listOf(
+        coop1,
+        coop2,
+        coop3
     )

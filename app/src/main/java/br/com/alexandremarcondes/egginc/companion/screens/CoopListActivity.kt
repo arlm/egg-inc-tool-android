@@ -2,7 +2,7 @@ package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.DisplayMetrics
+import androidx.activity.viewModels
 import androidx.animation.TargetAnimation
 import androidx.animation.fling
 import androidx.appcompat.app.AppCompatActivity
@@ -35,28 +35,27 @@ import br.com.alexandremarcondes.egginc.companion.data.impl.BlockingFakeDataRepo
 import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
+import br.com.alexandremarcondes.egginc.companion.util.getDimensions
 import ei.Ei
-import kotlin.math.abs
 
 class CoopListActivity : AppCompatActivity() {
-    
+    private val navigationViewModel by viewModels<NavigationViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val appContainer = (application as EggIncCompanionApp).container
 
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val heightPx = displayMetrics.heightPixels
-        val widthPx = displayMetrics.widthPixels
+        val windowSize = getDimensions(windowManager)
 
         setContent {
             EggIncCompanionTheme {
                 CoopList(
-                    appContainer.dataRepository,
-                    false,
-                    widthPx,
-                    heightPx
+                    repository =  appContainer.dataRepository,
+                    refreshingState =  false,
+                    widthPx = windowSize.width,
+                    heightPx = windowSize.height,
+                    navigateTo = navigationViewModel::navigateTo
                 )
             }
         }
@@ -68,19 +67,20 @@ fun CoopList(
     repository: IDataRepository,
     refreshingState: Boolean,
     widthPx: Int,
-    heightPx: Int
+    heightPx: Int,
+    navigateTo: (Screen) -> Unit
 ) {
     if (refreshingState) {
         Loading("coop list")
     } else {
-        val (state, refreshPosts) = refreshableUiStateFrom(repository::getUsers)
+        val (state, refreshUsers) = refreshableUiStateFrom(repository::getUsers)
 
         SwipeToRefreshLayout(
             refreshingState = refreshingState,
-            onRefresh = { refreshPosts() },
+            onRefresh = { refreshUsers() },
             refreshIndicator = { RefreshIndicator() }
         ) {
-            CoopListContent(state, widthPx, heightPx)
+            CoopListContent(state, widthPx, heightPx, navigateTo)
         }
     }
 }
@@ -88,7 +88,8 @@ fun CoopList(
 @Composable
 private fun CoopListContent(
     state: RefreshableUiState<List<User>>,
-    widthPx: Int, heightPx: Int
+    widthPx: Int, heightPx: Int,
+    navigateTo: (Screen) -> Unit
 ) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
@@ -98,8 +99,8 @@ private fun CoopListContent(
         state.currentData?.let { users ->
             CoopListContentBody(
                 users.first().contracts!!,
-                widthPx,
-                heightPx
+                widthPx, heightPx,
+                navigateTo
             )
         }
 
@@ -115,12 +116,13 @@ private fun CoopListContent(
 @Composable
 private fun CoopListContentBody(
     myContracts: Ei.MyContracts,
-    widthPx: Int, heightPx: Int
+    widthPx: Int, heightPx: Int,
+    navigateTo: (Screen) -> Unit
 ) {
     Stack(modifier = Modifier.fillMaxSize()) {
         VerticalScroller(modifier = Modifier.fillMaxSize()) {
             myContracts.contractsList.forEach { contract ->
-                CoopListItem(contract, widthPx, heightPx)
+                CoopListItem(contract, widthPx, heightPx, navigateTo)
                 Divider(color = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray )
             }
         }
@@ -130,7 +132,8 @@ private fun CoopListContentBody(
 @Composable
 private fun CoopListItem(
     localContract: Ei.LocalContract,
-    widthPx: Int, heightPx: Int
+    widthPx: Int, heightPx: Int,
+    navigateTo: (Screen) -> Unit
 ) {
     val egg = Egg.convert(localContract.contract.egg)
     val icon = imageResource(egg.resource)
@@ -148,16 +151,12 @@ private fun CoopListItem(
                 dragDirection = DragDirection.Horizontal,
                 onDragStarted = { oldPosition = position.value },
                 onDragStopped = {
-                    var target: Float
-
-                    if (position.targetValue < 0 && position.targetValue > -draggingLimit)
-                        target = 0f
-                    else if (position.targetValue <= -draggingLimit)
-                        target = if (oldPosition == (-size).toFloat()) 0f else (-size).toFloat()
-                    else if (position.targetValue > 0 && position.targetValue < draggingLimit)
-                        target = 0f
-                    else
-                        target = if (oldPosition == size.toFloat()) 0f else (size).toFloat()
+                    var target = when {
+                        position.targetValue < 0 && position.targetValue > -draggingLimit -> 0f
+                        position.targetValue <= -draggingLimit -> if (oldPosition == (-size).toFloat()) 0f else (-size).toFloat()
+                        position.targetValue > 0 && position.targetValue < draggingLimit -> 0f
+                        else -> if (oldPosition == size.toFloat()) 0f else (size).toFloat()
+                    }
 
                     position.fling(1f,
                         adjustTarget = { TargetAnimation(target) }
@@ -229,7 +228,8 @@ private fun CoopListItem(
         ListItem(
             modifier = Modifier
                 .offset(x = xOffset, y = 0.dp)
-                .drawBackground(MaterialTheme.colors.background),
+                .drawBackground(MaterialTheme.colors.background)
+                .clickable(onClick = { navigateTo(Screen.Coop(localContract.coopIdentifier, localContract.contract.identifier)) }),
             text = { Text(localContract.contract.name,
                 color = MaterialTheme.colors.onBackground) },
             secondaryText = { Text(localContract.contract.description,
@@ -250,7 +250,7 @@ private fun  CoopListItemPreview() {
             loadFakeUsers().first().contracts!!.contractsList.first(),
             411,
             731
-        )
+        ) {}
     }
 }
 
@@ -265,7 +265,7 @@ private fun  CoopListContentPreview() {
             loadFakeUsers().first().contracts!!,
             411,
             731
-        )
+        ) {}
     }
 }
 
@@ -281,38 +281,6 @@ private fun CoopListPreview() {
             loadFakeUsers().first().contracts!!,
             411,
             731
-        )
-    }
-}
-
-@Preview("Full UI Refreshing", group = "UI",
-    widthDp = 411,
-    heightDp = 731,
-    showBackground = true)
-@Composable
-private fun CoopListFullUiRefreshingPreview() {
-    EggIncCompanionTheme {
-        CoopList(
-            BlockingFakeDataRepository.DataRepository,
-            true,
-            411,
-            731
-        )
-    }
-}
-
-@Preview("Full UI Non-Refreshing", group = "UI",
-    widthDp = 411,
-    heightDp = 731,
-    showBackground = true)
-@Composable
-private fun CoopListFullUiNonRefreshingPreview() {
-    EggIncCompanionTheme {
-        CoopList(
-            BlockingFakeDataRepository.DataRepository,
-            false,
-            411,
-            731
-        )
+        ) {}
     }
 }

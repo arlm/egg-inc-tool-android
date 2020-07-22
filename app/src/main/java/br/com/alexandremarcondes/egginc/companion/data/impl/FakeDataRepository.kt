@@ -5,6 +5,7 @@ import android.os.Handler
 import br.com.alexandremarcondes.egginc.companion.data.IDataRepository
 import br.com.alexandremarcondes.egginc.companion.data.Result
 import br.com.alexandremarcondes.egginc.companion.data.model.Contract
+import br.com.alexandremarcondes.egginc.companion.data.model.Coop
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import java.util.concurrent.ExecutorService
 import kotlin.random.Random
@@ -27,11 +28,6 @@ class FakeDataRepository(
 
     override fun getUsers(callback: (Result<List<User>>) -> Unit) {
         executeInBackground(callback) {
-            simulateNetworkRequest()
-            Thread.sleep(1500L)
-            if (shouldRandomlyFail()) {
-                throw IllegalStateException()
-            }
             resultThreadHandler.post { callback(Result.Success(fakeUsers)) }
         }
     }
@@ -48,15 +44,25 @@ class FakeDataRepository(
 
     override fun getContracts(callback: (Result<List<Contract>>) -> Unit) {
         executeInBackground(callback) {
-            simulateNetworkRequest()
-            Thread.sleep(1500L)
-            if (shouldRandomlyFail()) {
-                throw IllegalStateException()
-            }
             resultThreadHandler.post { callback(Result.Success(fakeContracts)) }
         }
     }
 
+    override fun getCoops(callback: (Result<List<Coop>>) -> Unit) {
+        executeInBackground(callback) {
+            resultThreadHandler.post { callback(Result.Success(fakeCoops)) }
+        }
+    }
+
+    override fun getCoop(coopId: String, contractId: String, callback: (Result<Coop?>) -> Unit) {
+        executeInBackground(callback) {
+            resultThreadHandler.post {
+                callback(Result.Success(
+                    fakeCoops.find { it.identifier == coopId && it.contract.identifier == contractId }
+                ))
+            }
+        }
+    }
 
     /**
      * Executes a block of code in the past and returns an error in the [callback]
@@ -84,7 +90,7 @@ class FakeDataRepository(
     }
 
     /**
-     * 1/3 requests should fail loading
+     * 1/5 requests should fail loading
      */
-    private fun shouldRandomlyFail(): Boolean = Random.nextFloat() < 0.33f
+    private fun shouldRandomlyFail(): Boolean = Random.nextFloat() < 0.2f
 }

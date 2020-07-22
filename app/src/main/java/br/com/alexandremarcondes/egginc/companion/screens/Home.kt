@@ -3,7 +3,6 @@ package br.com.alexandremarcondes.egginc.companion.screens
 import android.content.res.Configuration
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
-import android.view.Surface
 import androidx.compose.Composable
 import androidx.ui.core.Alignment
 import androidx.ui.core.ContentScale
@@ -29,9 +28,7 @@ fun Home(rotation: Int, navigateTo: (Screen) -> Unit) {
     when (rotation) {
         ORIENTATION_PORTRAIT ->
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
+                modifier = Modifier.fillMaxSize().padding(4.dp)
             ) {
                 HomeContent(
                     false,
@@ -40,9 +37,7 @@ fun Home(rotation: Int, navigateTo: (Screen) -> Unit) {
             }
         ORIENTATION_LANDSCAPE ->
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp)
+                modifier = Modifier.fillMaxSize().padding(4.dp)
             ) {
                 HomeContent(
                     true,

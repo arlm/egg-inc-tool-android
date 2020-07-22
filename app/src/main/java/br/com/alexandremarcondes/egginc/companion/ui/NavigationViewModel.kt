@@ -72,6 +72,7 @@ private const val SIS_SCREEN = "sis_screen"
 private const val SIS_NAME = "screen_name"
 private const val SIS_USER = "user"
 private const val SIS_COOP = "coop"
+private const val SIS_CONTRACT = "contract"
 
 /**
  * Convert a screen to a bundle that can be stored in [SavedStateHandle]
@@ -85,6 +86,7 @@ private fun Screen.toBundle(): Bundle {
             }
             is Screen.Coop -> {
                 it.putString(SIS_COOP, coopId)
+                it.putString(SIS_CONTRACT, contractId)
             }
         }
     }
@@ -104,11 +106,12 @@ private fun Bundle.toScreen(): Screen {
         ScreenName.COOP_LIST -> Screen.CoopList
         ScreenName.COOP -> {
             val coopId = getStringOrThrow(SIS_COOP)
-            Screen.Coop(coopId)
+            val contractId = getStringOrThrow(SIS_CONTRACT)
+            Screen.Coop(coopId, contractId)
         }
         ScreenName.USER -> {
             val userId = getStringOrThrow(SIS_USER)
-            Screen.Coop(userId)
+            Screen.User(userId)
         }
         ScreenName.LOADING -> Screen.Loading
         ScreenName.SETUP -> Screen.Setup

@@ -12,7 +12,6 @@ import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.*
-import androidx.ui.material.Divider
 import androidx.ui.res.imageResource
 import androidx.ui.text.font.FontWeight
 import androidx.ui.text.style.TextAlign
@@ -21,7 +20,10 @@ import androidx.ui.unit.dp
 import br.com.alexandremarcondes.egginc.companion.EggIncCompanionApp
 import br.com.alexandremarcondes.egginc.companion.R
 import br.com.alexandremarcondes.egginc.companion.data.IAppContainer
+import br.com.alexandremarcondes.egginc.companion.data.composable.fetchUser
+import br.com.alexandremarcondes.egginc.companion.data.composable.refreshUser
 import br.com.alexandremarcondes.egginc.companion.data.impl.fakeLegacyContractsContracts
+import br.com.alexandremarcondes.egginc.companion.data.impl.fakeUsers
 import br.com.alexandremarcondes.egginc.companion.data.impl.user1
 import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.LegacyContracts
@@ -39,12 +41,14 @@ class UserActivity : AppCompatActivity() {
 
         activityContext = this
         val appContainer = (application as EggIncCompanionApp).container
+        val user = fakeUsers.first()
 
         setContent {
             EggIncCompanionTheme {
                 UserData(
                     appContainer,
-                    false
+                    false,
+                    user.userId
                 )
             }
         }
@@ -52,15 +56,15 @@ class UserActivity : AppCompatActivity() {
 }
 
 @Composable
-fun UserData(appContainer: IAppContainer, refreshingState: Boolean) {
+fun UserData(appContainer: IAppContainer, refreshingState: Boolean, userId: String) {
     if (refreshingState) {
         Loading("user data")
     } else {
-        val (state, refreshPosts) = refreshableUiStateFrom(appContainer.dataRepository::getUsers)
+        var state = fetchUser(userId, appContainer.dataRepository)
 
         SwipeToRefreshLayout(
             refreshingState = refreshingState,
-            onRefresh = { refreshPosts() },
+            onRefresh = { state = refreshUser(userId, appContainer.dataRepository) },
             refreshIndicator = { RefreshIndicator() }
         ) {
             UserContent(state, appContainer.legacyContracts)
@@ -69,13 +73,13 @@ fun UserData(appContainer: IAppContainer, refreshingState: Boolean) {
 }
 
 @Composable
-private fun UserContent(state: RefreshableUiState<List<User>>, legacyContracts: LegacyContracts) {
+private fun UserContent(state: RefreshableUiState<User>, legacyContracts: LegacyContracts) {
     val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
         state is RefreshableUiState.Error
     }
 
     Stack(modifier = Modifier.fillMaxSize()) {
-            UserContentBody(state.currentData!!.first(), legacyContracts)
+            UserContentBody(state.currentData!!, legacyContracts)
 
         ErrorSnackbar(
             text = "Could not refresh the user list!",

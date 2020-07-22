@@ -1,10 +1,13 @@
 package br.com.alexandremarcondes.egginc.companion.screens
 
 import android.content.res.Configuration
+import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Size
 import android.view.Surface
+import android.view.WindowInsets
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
@@ -19,6 +22,7 @@ import br.com.alexandremarcondes.egginc.companion.ui.EggIncCompanionTheme
 import br.com.alexandremarcondes.egginc.companion.ui.Loading
 import br.com.alexandremarcondes.egginc.companion.ui.NavigationViewModel
 import br.com.alexandremarcondes.egginc.companion.ui.Screen
+import br.com.alexandremarcondes.egginc.companion.util.getDimensions
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
@@ -33,10 +37,7 @@ class MainActivity : AppCompatActivity() {
         else
             resources.configuration.orientation
 
-        val displayMetrics = DisplayMetrics()
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        val heightPx = displayMetrics.heightPixels
-        val widthPx = displayMetrics.widthPixels
+        val windowSize = getDimensions(windowManager)
 
         setContent {
             EggIncCompanionTheme {
@@ -44,8 +45,8 @@ class MainActivity : AppCompatActivity() {
                     navigationViewModel = navigationViewModel,
                     app = app.container,
                     rotation = rotation,
-                    widthPx = widthPx,
-                    heightPx = heightPx
+                    widthPx = windowSize.width,
+                    heightPx = windowSize.height
                 )
             }
         }
@@ -92,19 +93,30 @@ private  fun AppContent(
 
                 is Screen.UserList -> UserList(
                     repository = app.dataRepository,
-                    refreshingState = false
+                    refreshingState = false,
+                    navigateTo = navigationViewModel::navigateTo
                 )
 
                 is Screen.CoopList -> CoopList(
                     repository = app.dataRepository,
                     refreshingState = false,
                     widthPx =  widthPx,
-                    heightPx = heightPx
+                    heightPx = heightPx,
+                    navigateTo = navigationViewModel::navigateTo
                 )
 
-                is Screen.User -> TODO()
+                is Screen.User -> UserData(
+                    appContainer = app,
+                    refreshingState = false,
+                    userId = screen.userId
+                )
 
-                is Screen.Coop -> TODO()
+                is Screen.Coop -> CoopData(
+                    repository = app.dataRepository,
+                    refreshingState = false,
+                    coopId = screen.coopId,
+                    contractId = screen.contractId
+                )
 
                 is Screen.Loading -> Loading()
 
