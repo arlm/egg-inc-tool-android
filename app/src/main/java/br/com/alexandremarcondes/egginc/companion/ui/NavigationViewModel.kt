@@ -45,7 +45,15 @@ class NavigationViewModel(private val savedStateHandle: SavedStateHandle) : View
     @MainThread
     fun onBack(): Boolean {
         val wasHandled = currentScreen != Screen.Home
-        currentScreen = Screen.Home
+
+        currentScreen = when (currentScreen) {
+            is Screen.Loading -> return true
+            is Screen.Setup -> return true
+            is Screen.User -> Screen.UserList
+            is Screen.Coop -> Screen.CoopList
+            else -> Screen.Home
+        }
+
         return wasHandled
     }
 
