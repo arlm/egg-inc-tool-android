@@ -23,6 +23,7 @@ import br.com.alexandremarcondes.egginc.companion.ui.Loading
 import br.com.alexandremarcondes.egginc.companion.ui.NavigationViewModel
 import br.com.alexandremarcondes.egginc.companion.ui.Screen
 import br.com.alexandremarcondes.egginc.companion.util.getDimensions
+import br.com.alexandremarcondes.egginc.companion.util.toIntDPs
 import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
@@ -45,8 +46,8 @@ class MainActivity : AppCompatActivity() {
                     navigationViewModel = navigationViewModel,
                     app = app.container,
                     rotation = rotation,
-                    widthPx = windowSize.width,
-                    heightPx = windowSize.height
+                    widthPx = windowSize.width.toIntDPs(this),
+                    heightPx = windowSize.height.toIntDPs(this)
                 )
             }
         }

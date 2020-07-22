@@ -36,6 +36,7 @@ import br.com.alexandremarcondes.egginc.companion.data.model.Egg
 import br.com.alexandremarcondes.egginc.companion.data.model.User
 import br.com.alexandremarcondes.egginc.companion.ui.*
 import br.com.alexandremarcondes.egginc.companion.util.getDimensions
+import br.com.alexandremarcondes.egginc.companion.util.toIntDPs
 import ei.Ei
 
 class CoopListActivity : AppCompatActivity() {
@@ -53,8 +54,8 @@ class CoopListActivity : AppCompatActivity() {
                 CoopList(
                     repository =  appContainer.dataRepository,
                     refreshingState =  false,
-                    widthPx = windowSize.width,
-                    heightPx = windowSize.height,
+                    widthPx = windowSize.width.toIntDPs(this),
+                    heightPx = windowSize.height.toIntDPs(this),
                     navigateTo = navigationViewModel::navigateTo
                 )
             }
