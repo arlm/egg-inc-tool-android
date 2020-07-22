@@ -45,6 +45,7 @@ fun fetchUser(userId: String, repository: IDataRepository): RefreshableUiState<U
 
 fun refreshUser(userId: String, repository: IDataRepository): RefreshableUiState<User> {
     var state: RefreshableUiState<User> = RefreshableUiState.Success(data = null, loading = true)
+    state = RefreshableUiState.Success(data = state.currentData, loading = true)
 
     repository.getUser(userId) { result ->
         state = when (result) {

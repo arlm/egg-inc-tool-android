@@ -23,6 +23,8 @@ fun fetchCoop(coopId: String, contractId: String, repository: IDataRepository): 
     // Whenever this effect is used in a composable function, it'll load data from the repository
     // when the first composition is applied
     onCommit(contractId, repository) {
+        state = RefreshableUiState.Success(data = state.currentData, loading = true)
+
         repository.getCoop(coopId, contractId) { result ->
             state = when (result) {
                 is Result.Success -> {
@@ -42,6 +44,7 @@ fun fetchCoop(coopId: String, contractId: String, repository: IDataRepository): 
 
 fun refreshCoop(coopId: String, contractId: String, repository: IDataRepository): RefreshableUiState<Coop> {
     var state: RefreshableUiState<Coop> = RefreshableUiState.Success(data = null, loading = true)
+    state = RefreshableUiState.Success(data = state.currentData, loading = true)
 
     repository.getCoop(coopId, contractId) { result ->
         state = when (result) {

@@ -76,7 +76,7 @@ private fun CoopContent(state: RefreshableUiState<Coop>) {
     }
 
     Stack(modifier = Modifier.fillMaxSize()) {
-        CoopContentBody(state.currentData!!)
+        CoopContentBody(state.currentData)
 
         ErrorSnackbar(
             text = "Could not refresh the user list!",
@@ -88,12 +88,16 @@ private fun CoopContent(state: RefreshableUiState<Coop>) {
 }
 
 @Composable
-private fun CoopContentBody(coop: Coop) {
-    Stack(modifier = Modifier.fillMaxSize()) {
-        VerticalScroller(modifier = Modifier.fillMaxSize()) {
-            CoopTitle(coop)
-            CoopGoals(coop)
-            CoopFooter(coop)
+private fun CoopContentBody(coop: Coop?) {
+    if (coop == null) {
+        Loading("coop")
+    } else {
+        Stack(modifier = Modifier.fillMaxSize()) {
+            VerticalScroller(modifier = Modifier.fillMaxSize()) {
+                CoopTitle(coop)
+                CoopGoals(coop)
+                CoopFooter(coop)
+            }
         }
     }
 }

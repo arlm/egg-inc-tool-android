@@ -74,12 +74,10 @@ fun UserData(appContainer: IAppContainer, refreshingState: Boolean, userId: Stri
 
 @Composable
 private fun UserContent(state: RefreshableUiState<User>, legacyContracts: LegacyContracts) {
-    val (showSnackbarError, updateShowSnackbarError) = stateFor(state) {
-        state is RefreshableUiState.Error
-    }
+    val (showSnackbarError, updateShowSnackbarError) = stateFor(state) { state is RefreshableUiState.Error }
 
     Stack(modifier = Modifier.fillMaxSize()) {
-            UserContentBody(state.currentData!!, legacyContracts)
+            UserContentBody(state.currentData, legacyContracts)
 
         ErrorSnackbar(
             text = "Could not refresh the user list!",
@@ -91,13 +89,17 @@ private fun UserContent(state: RefreshableUiState<User>, legacyContracts: Legacy
 }
 
 @Composable
-private fun UserContentBody(user: User, legacyContracts: LegacyContracts) {
+private fun UserContentBody(user: User?, legacyContracts: LegacyContracts) {
     Stack(modifier = Modifier.fillMaxSize()) {
-        VerticalScroller(modifier = Modifier.fillMaxSize()) {
-            UserTitle(user)
-            CurrentContracts(user, legacyContracts)
-            ArchivedContracts(user, legacyContracts)
-            Trophies(user)
+        if (user == null) {
+            Loading("user")
+        } else {
+            VerticalScroller(modifier = Modifier.fillMaxSize()) {
+                UserTitle(user)
+                CurrentContracts(user, legacyContracts)
+                ArchivedContracts(user, legacyContracts)
+                Trophies(user)
+            }
         }
     }
 }
